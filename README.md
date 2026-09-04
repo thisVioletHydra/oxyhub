@@ -16,9 +16,9 @@ pnpm add -D oxlint @oxyhub/oxlint-plugin
 {
   "jsPlugins": ["@oxyhub/oxlint-plugin"],
   "rules": {
-    "oxxy/no-bang-condition": "warn",
-    "oxxy/prefer-process-import": "error",
-    "oxxy/id-length": [
+    "oxyhub/no-bang-condition": "warn",
+    "oxyhub/prefer-process-import": "error",
+    "oxyhub/id-length": [
       "error",
       {
         "min": 2,
@@ -31,7 +31,7 @@ pnpm add -D oxlint @oxyhub/oxlint-plugin
 }
 ```
 
-Rule ids use the `oxxy/` prefix (`meta.name`).
+Rule ids use the `oxyhub/` prefix (`meta.name`).
 
 ## Publish
 

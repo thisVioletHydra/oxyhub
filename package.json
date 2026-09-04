@@ -1,17 +1,17 @@
 {
   "name": "@oxyhub/oxlint-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Oxlint plugin: layout, Node.js imports, and boolean-condition rules",
   "type": "module",
   "license": "MIT",
   "author": "thisVioletHydra",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thisVioletHydra/oxxy.git"
+    "url": "git+https://github.com/thisVioletHydra/oxyhub.git"
   },
-  "homepage": "https://github.com/thisVioletHydra/oxxy#readme",
+  "homepage": "https://github.com/thisVioletHydra/oxyhub#readme",
   "bugs": {
-    "url": "https://github.com/thisVioletHydra/oxxy/issues"
+    "url": "https://github.com/thisVioletHydra/oxyhub/issues"
   },
   "keywords": [
     "oxlint",

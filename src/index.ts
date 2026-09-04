@@ -21,7 +21,7 @@ import preferProcessImport from './rules/prefer-process-import';
 
 export default {
   meta: {
-    name: 'oxxy',
+    name: 'oxyhub',
   },
   rules: {
     'consistent-block-indent': consistentBlockIndent,
