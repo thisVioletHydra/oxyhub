@@ -1,11 +1,11 @@
-# @oxxy/oxlint-plugin
+# @oxyhub/oxlint-plugin
 
 Oxlint JS plugin: layout, Node.js imports, and boolean-condition rules.
 
 ## Install
 
 ```bash
-pnpm add -D oxlint @oxxy/oxlint-plugin
+pnpm add -D oxlint @oxyhub/oxlint-plugin
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ pnpm add -D oxlint @oxxy/oxlint-plugin
 
 ```json
 {
-  "jsPlugins": ["@oxxy/oxlint-plugin"],
+  "jsPlugins": ["@oxyhub/oxlint-plugin"],
   "rules": {
     "oxxy/no-bang-condition": "warn",
     "oxxy/prefer-process-import": "error",

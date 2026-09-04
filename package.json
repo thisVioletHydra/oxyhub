@@ -1,5 +1,5 @@
 {
-  "name": "@oxxy/oxlint-plugin",
+  "name": "@oxyhub/oxlint-plugin",
   "version": "0.1.0",
   "description": "Oxlint plugin: layout, Node.js imports, and boolean-condition rules",
   "type": "module",
