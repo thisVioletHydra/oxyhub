@@ -1,0 +1,54 @@
+{
+  "name": "@oxxy/oxlint-plugin",
+  "version": "0.1.0",
+  "description": "Oxlint plugin: layout, Node.js imports, and boolean-condition rules",
+  "type": "module",
+  "license": "MIT",
+  "author": "thisVioletHydra",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thisVioletHydra/oxxy.git"
+  },
+  "homepage": "https://github.com/thisVioletHydra/oxxy#readme",
+  "bugs": {
+    "url": "https://github.com/thisVioletHydra/oxxy/issues"
+  },
+  "keywords": [
+    "oxlint",
+    "oxc",
+    "lint",
+    "plugin"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "oxlint": "^1.79.0"
+  },
+  "devDependencies": {
+    "@types/estree": "^1.0.9",
+    "eslint": "^10.9.1",
+    "oxlint": "^1.81.0",
+    "tsdown": "^0.16.8",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@11.22.0"
+}
