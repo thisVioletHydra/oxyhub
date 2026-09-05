@@ -1,4 +1,4 @@
-import type { LintNode, RuleFixer, RuleModule, SourceCode } from '#plugin-types';
+import type { Expression, LintNode, RuleFixer, RuleModule, SourceCode } from '#plugin-types';
 
 import {
   isClosingParenToken,
@@ -8,7 +8,7 @@ import {
 
 function getTestParens(
   sourceCode: SourceCode,
-  testNode: import('estree').Expression
+  testNode: Expression
 ) {
   const testFirst = sourceCode.getFirstToken(
     testNode
@@ -63,7 +63,7 @@ const rule: RuleModule = {
 
     function checkCondition(
       node: LintNode,
-      testNode: import('estree').Expression | null | undefined
+      testNode: Expression | null | undefined
     ) {
       if (testNode === null || testNode === undefined) {
         return;

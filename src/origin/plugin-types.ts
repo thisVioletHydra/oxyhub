@@ -1,5 +1,33 @@
 import type { AST, Rule, Scope, SourceCode as ESLintSourceCode } from 'eslint';
-import type { Node as ESTreeNode } from 'estree';
+import type {
+  ArrayExpression,
+  ArrayPattern,
+  ArrowFunctionExpression,
+  BlockStatement,
+  CallExpression,
+  ConditionalExpression,
+  Expression,
+  ExpressionStatement,
+  FunctionDeclaration,
+  FunctionExpression,
+  Identifier,
+  IfStatement,
+  ImportDeclaration,
+  ImportDefaultSpecifier,
+  ImportSpecifier,
+  Literal,
+  MemberExpression,
+  Node as ESTreeNode,
+  ObjectExpression,
+  ObjectPattern,
+  Program,
+  Property,
+  ReturnStatement,
+  SwitchStatement,
+  UnaryExpression,
+  VariableDeclarator,
+  WhileStatement,
+} from 'estree';
 
 export type RuleModule = Rule.RuleModule;
 export type RuleContext = Rule.RuleContext;
@@ -10,6 +38,35 @@ export type SourceCode = ESLintSourceCode & {
 export type Token = AST.Token;
 export type LintScope = Scope.Scope;
 export type LintVariable = Scope.Variable;
+
+export type {
+  ArrayExpression,
+  ArrayPattern,
+  ArrowFunctionExpression,
+  BlockStatement,
+  CallExpression,
+  ConditionalExpression,
+  Expression,
+  ExpressionStatement,
+  FunctionDeclaration,
+  FunctionExpression,
+  Identifier,
+  IfStatement,
+  ImportDeclaration,
+  ImportDefaultSpecifier,
+  ImportSpecifier,
+  Literal,
+  MemberExpression,
+  ObjectExpression,
+  ObjectPattern,
+  Program,
+  Property,
+  ReturnStatement,
+  SwitchStatement,
+  UnaryExpression,
+  VariableDeclarator,
+  WhileStatement,
+};
 
 export type LintNode = ESTreeNode & {
   parent?: LintNode | null;
@@ -23,6 +80,6 @@ export type LintNode = ESTreeNode & {
 };
 
 export type FunctionNode =
-  | import('estree').FunctionDeclaration
-  | import('estree').FunctionExpression
-  | import('estree').ArrowFunctionExpression;
+  | FunctionDeclaration
+  | FunctionExpression
+  | ArrowFunctionExpression;

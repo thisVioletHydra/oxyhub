@@ -33,7 +33,8 @@ function getOpeningDelimiter(
 function getMembers(node: LintNode): LintNode[] {
   if (node.type === 'ArrayExpression') {
     return node.elements.filter(
-      (element) => element !== null
+      (element): element is NonNullable<(typeof node.elements)[number]> =>
+        element !== null
     );
   }
 

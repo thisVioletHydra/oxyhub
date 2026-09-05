@@ -1,8 +1,8 @@
-import type { LintNode, RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
+import type { FunctionExpression, LintNode, Property, RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
 
 function renderPropertyKey(
   sourceCode: SourceCode,
-  property: import('estree').Property
+  property: Property
 ) {
   if (property.computed) {
     return `[${sourceCode.getText(
@@ -17,7 +17,7 @@ function renderPropertyKey(
 
 function renderParams(
   sourceCode: SourceCode,
-  fn: import('estree').FunctionExpression
+  fn: FunctionExpression
 ) {
   const bodyStart = sourceCode.getFirstToken(
     fn.body
@@ -105,7 +105,7 @@ function usesThis(
 
 function renderArrowFunction(
   sourceCode: SourceCode,
-  fn: import('estree').FunctionExpression
+  fn: FunctionExpression
 ) {
   const asyncPrefix = fn.async === true
     ? 'async '
@@ -143,7 +143,7 @@ const rule: RuleModule = {
   create(context) {
     const sourceCode = context.sourceCode;
 
-    function reportMethod(property: import('estree').Property) {
+    function reportMethod(property: Property) {
       const fn = property.value;
       if (fn.type !== 'FunctionExpression') {
         return;

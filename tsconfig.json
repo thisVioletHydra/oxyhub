@@ -8,11 +8,12 @@
     "paths": {
       "*": ["./*"],
       "#plugin-types": ["./src/origin/plugin-types.ts"],
-      "#rules/*": ["./src/origin/rules/*"],
+      "#rules/*": ["./src/origin/rules/*/index.ts"],
       "#utils/*": ["./src/origin/utils/*"]
     },
     "strict": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,

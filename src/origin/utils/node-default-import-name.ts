@@ -1,3 +1,5 @@
+import type { ImportSpecifier, Literal } from '#plugin-types';
+
 export const KNOWN_NODE_DEFAULT_NAMES: Record<string, string> = {
   'node:process': 'process',
   'node:path': 'path',
@@ -18,7 +20,7 @@ export function getNodeDefaultImportName(source: string) {
   )[0];
 }
 
-export function getImportQuote(sourceNode: import('estree').Literal) {
+export function getImportQuote(sourceNode: Literal) {
   if (typeof sourceNode.raw === 'string' && sourceNode.raw.startsWith(
     '"'
   )) {
@@ -28,7 +30,7 @@ export function getImportQuote(sourceNode: import('estree').Literal) {
   return '\'';
 }
 
-export function getImportedBindingName(specifier: import('estree').ImportSpecifier) {
+export function getImportedBindingName(specifier: ImportSpecifier) {
   if (specifier.imported.type === 'Identifier') {
     return specifier.imported.name;
   }

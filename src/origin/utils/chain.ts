@@ -1,4 +1,4 @@
-import type { LintNode, SourceCode, Token } from '#plugin-types';
+import type { ArrowFunctionExpression, LintNode, MemberExpression, SourceCode, Token } from '#plugin-types';
 
 const NON_CHAIN_OBJECT_TYPES = new Set<string>([
   'TSAsExpression',
@@ -109,7 +109,7 @@ export function walkMemberChain(
   visitLink: (
 
     objectNode: LintNode,
-                               memberNode: import('estree').MemberExpression & { parent?: LintNode | null },
+                               memberNode: MemberExpression & { parent?: LintNode | null },
   ) => void
 ) {
   if (expression.type === 'MemberExpression') {
@@ -139,7 +139,7 @@ export function walkMemberChain(
 export function getChainLinkRange(
   sourceCode: SourceCode,
   objectNode: LintNode,
-  memberNode: import('estree').MemberExpression
+  memberNode: MemberExpression
 ) {
   const linkStart = sourceCode.getLastToken(
     objectNode
@@ -163,7 +163,7 @@ export function getChainLinkRange(
   };
 }
 
-export function getArrowToken(sourceCode: SourceCode, node: import('estree').ArrowFunctionExpression) {
+export function getArrowToken(sourceCode: SourceCode, node: ArrowFunctionExpression) {
   const bodyStart = sourceCode.getFirstToken(
     node.body
   );

@@ -1,7 +1,7 @@
-import type { LintNode, LintScope } from '#plugin-types';
+import type { ImportDeclaration, LintNode, LintScope, Program } from '#plugin-types';
 
 export function isNodeValueImport(
-  node: import('estree').ImportDeclaration & { importKind?: 'type' | 'value' }
+  node: ImportDeclaration & { importKind?: 'type' | 'value' }
 ) {
   return (
     typeof node.source.value === 'string'
@@ -12,14 +12,14 @@ export function isNodeValueImport(
   );
 }
 
-export function hasNamedValueImport(node: import('estree').ImportDeclaration) {
+export function hasNamedValueImport(node: ImportDeclaration) {
   return node.specifiers.some(
     (specifier: LintNode) =>
       specifier.type === 'ImportSpecifier' && specifier.importKind !== 'type',
   );
 }
 
-export function hasNodeNamedValueImport(program: import('estree').Program) {
+export function hasNodeNamedValueImport(program: Program) {
   return program.body.some(
     (node) =>
       node.type === 'ImportDeclaration'

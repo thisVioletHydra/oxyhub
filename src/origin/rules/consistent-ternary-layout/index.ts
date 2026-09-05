@@ -1,4 +1,4 @@
-import type { LintNode, RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
+import type { ConditionalExpression, LintNode, RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
 
 import { getLineIndent, isTokenOnSameLine } from '#utils/function-params';
 
@@ -128,7 +128,7 @@ const rule: RuleModule = {
       );
     }
 
-    function checkTernary(node: import('estree').ConditionalExpression) {
+    function checkTernary(node: ConditionalExpression) {
       const questionToken = sourceCode.getTokenAfter(
         node.test,
         (token: Token) => token.value === '?',
@@ -178,7 +178,7 @@ const rule: RuleModule = {
       );
       const branchIndent = `${baseIndent}  `;
 
-      if (multilineIntent === null || multilineIntent === undefined) {
+      if (multilineIntent === false) {
         normalizeGap(
           node,
           testEnd.range[1],

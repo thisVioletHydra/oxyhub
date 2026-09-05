@@ -1,4 +1,4 @@
-import type { LintNode, RuleFixer, RuleModule } from '#plugin-types';
+import type { LintNode, MemberExpression, RuleFixer, RuleModule } from '#plugin-types';
 
 import {
   collectChainExpressions,
@@ -7,7 +7,7 @@ import {
 } from '#utils/chain';
 import { getLineIndent, isTokenOnSameLine } from '#utils/function-params';
 
-function isMethodLink(memberNode: import('estree').MemberExpression & { parent?: LintNode | null }) {
+function isMethodLink(memberNode: MemberExpression & { parent?: LintNode | null }) {
   const parent = memberNode.parent;
   return parent?.type === 'CallExpression' && parent.callee === memberNode;
 }
@@ -84,7 +84,7 @@ const rule: RuleModule = {
     function checkChain(expression: LintNode) {
       const links: Array<{
         objectNode: LintNode;
-        memberNode: import('estree').MemberExpression & { parent?: LintNode | null };
+        memberNode: MemberExpression & { parent?: LintNode | null };
       }> = [];
       walkMemberChain(
         expression,
@@ -107,7 +107,7 @@ const rule: RuleModule = {
 
       const resolved: Array<{
         objectNode: LintNode;
-        memberNode: import('estree').MemberExpression & { parent?: LintNode | null };
+        memberNode: MemberExpression & { parent?: LintNode | null };
         range: NonNullable<ReturnType<typeof getChainLinkRange>>;
         method: boolean;
       }> = [];

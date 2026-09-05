@@ -1,4 +1,4 @@
-import type { RuleFixer, RuleModule } from '#plugin-types';
+import type { ImportDeclaration, RuleFixer, RuleModule } from '#plugin-types';
 
 import {
   getImportGroup,
@@ -31,7 +31,7 @@ const rule: RuleModule = {
   create(context) {
     const sourceCode = context.sourceCode;
 
-    function buildImportBlock(imports: import('estree').ImportDeclaration[]) {
+    function buildImportBlock(imports: ImportDeclaration[]) {
       const chunks: string[] = [];
 
       for (const group of GROUP_ORDER) {

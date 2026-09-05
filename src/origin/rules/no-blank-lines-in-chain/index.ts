@@ -1,4 +1,4 @@
-import type { LintNode, RuleFixer, RuleModule } from '#plugin-types';
+import type { ArrowFunctionExpression, ExpressionStatement, LintNode, MemberExpression, ReturnStatement, RuleFixer, RuleModule, VariableDeclarator } from '#plugin-types';
 
 import {
   collectChainExpressions,
@@ -37,7 +37,7 @@ const rule: RuleModule = {
 
     function checkChainLink(
       objectNode: LintNode,
-      memberNode: import('estree').MemberExpression
+      memberNode: MemberExpression
     ) {
       const range = getChainLinkRange(
         sourceCode,
@@ -101,25 +101,25 @@ const rule: RuleModule = {
     }
 
     const visitors = {
-      ExpressionStatement(node: import('estree').ExpressionStatement) {
+      ExpressionStatement(node: ExpressionStatement) {
         visitChainNodes(
           node,
           checkChain
         );
       },
-      VariableDeclarator(node: import('estree').VariableDeclarator) {
+      VariableDeclarator(node: VariableDeclarator) {
         visitChainNodes(
           node,
           checkChain
         );
       },
-      ReturnStatement(node: import('estree').ReturnStatement) {
+      ReturnStatement(node: ReturnStatement) {
         visitChainNodes(
           node,
           checkChain
         );
       },
-      ArrowFunctionExpression(node: import('estree').ArrowFunctionExpression) {
+      ArrowFunctionExpression(node: ArrowFunctionExpression) {
         visitChainNodes(
           node,
           checkChain

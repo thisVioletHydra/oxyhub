@@ -1,4 +1,4 @@
-import type { LintNode } from '#plugin-types';
+import type { ImportDeclaration, LintNode, Program } from '#plugin-types';
 
 export const ImportGroup = {
   TYPE: 0,
@@ -10,7 +10,7 @@ export const ImportGroup = {
 type ImportGroupId = (typeof ImportGroup)[keyof typeof ImportGroup];
 
 export function getImportGroup(
-  node: import('estree').ImportDeclaration & { importKind?: 'type' | 'value' }
+  node: ImportDeclaration & { importKind?: 'type' | 'value' }
 ): ImportGroupId {
   const specifiers = node.specifiers;
 
@@ -40,7 +40,7 @@ export function getImportGroup(
   return ImportGroup.TYPE;
 }
 
-export function getTopImportBlock(program: import('estree').Program) {
+export function getTopImportBlock(program: Program) {
   const {
     body
   } = program;
@@ -60,7 +60,7 @@ export function getTopImportBlock(program: import('estree').Program) {
   const imports = body.slice(
     0,
     blockEnd
-  ) as import('estree').ImportDeclaration[];
+  ) as ImportDeclaration[];
 
   for (let index = blockEnd; index < body.length; index += 1) {
     const statement = body[index];

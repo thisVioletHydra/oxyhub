@@ -21,7 +21,7 @@
   ],
   "imports": {
     "#plugin-types": "./src/origin/plugin-types.ts",
-    "#rules/*": "./src/origin/rules/*.ts",
+    "#rules/*": "./src/origin/rules/*/index.ts",
     "#utils/*": "./src/origin/utils/*.ts"
   },
   "exports": {

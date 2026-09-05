@@ -1,11 +1,11 @@
-import type { LintNode, RuleModule } from '#plugin-types';
+import type { ImportDeclaration, LintNode, MemberExpression, RuleModule } from '#plugin-types';
 
 import { getScopeVariable } from '#utils/node-imports';
 
 const FS_MODULE = 'node:fs';
 const FS_BINDING = 'fs';
 
-function isFsDefaultImport(node: import('estree').ImportDeclaration) {
+function isFsDefaultImport(node: ImportDeclaration) {
   return (
     node.source.value === FS_MODULE
     && node.specifiers.some(
@@ -16,7 +16,7 @@ function isFsDefaultImport(node: import('estree').ImportDeclaration) {
   );
 }
 
-function getSyncMethodName(node: import('estree').MemberExpression) {
+function getSyncMethodName(node: MemberExpression) {
   if (node.computed || node.property.type !== 'Identifier') {
     return null;
   }

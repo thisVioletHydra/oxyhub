@@ -1,7 +1,6 @@
-import type { LintNode, RuleFixer, RuleModule, SourceCode } from '#plugin-types';
+import type { Identifier, ImportDeclaration, ImportDefaultSpecifier, ImportSpecifier, LintNode, Program, RuleFixer, RuleModule, SourceCode } from '#plugin-types';
 
 import {
-  getImportGroup,
   getTopImportBlock,
   ImportGroup,
 } from '#utils/import-groups';
@@ -24,13 +23,13 @@ const GROUP_ORDER = [
 ];
 
 type NamedValueImport = {
-  importNode: import('estree').ImportDeclaration;
-  specifier: import('estree').ImportSpecifier;
+  importNode: ImportDeclaration;
+  specifier: ImportSpecifier;
 };
 
-function collectImportParts(importNodes: import('estree').ImportDeclaration[]) {
-  let defaultSpecifier: import('estree').ImportDefaultSpecifier | null = null;
-  const typeSpecifiers: import('estree').ImportSpecifier[] = [];
+function collectImportParts(importNodes: ImportDeclaration[]) {
+  let defaultSpecifier: ImportDefaultSpecifier | null = null;
+  const typeSpecifiers: ImportSpecifier[] = [];
   const namedValueImports: NamedValueImport[] = [];
 
   for (const importNode of importNodes) {
@@ -65,7 +64,7 @@ function collectImportParts(importNodes: import('estree').ImportDeclaration[]) {
 
 function renderTypeImport(
   source: string,
-  typeSpecifiers: import('estree').ImportSpecifier[],
+  typeSpecifiers: ImportSpecifier[],
   quote: string
 ) {
   const names = typeSpecifiers.map(
@@ -136,7 +135,7 @@ function renderImportBlock(importLines: string[]) {
 function buildFixes(
   sourceCode: SourceCode,
   fixer: RuleFixer,
-  program: import('estree').Program
+  program: Program
 ) {
   const block = getTopImportBlock(
     program
@@ -146,8 +145,8 @@ function buildFixes(
   }
 
   const fixes: Array<ReturnType<RuleFixer['replaceText']>> = [];
-  const nodeImportsBySource = new Map<string, import('estree').ImportDeclaration[]>();
-  const retainedImports: import('estree').ImportDeclaration[] = [];
+  const nodeImportsBySource = new Map<string, ImportDeclaration[]>();
+  const retainedImports: ImportDeclaration[] = [];
 
   for (const importNode of block.imports) {
     if (isNodeValueImport(
@@ -221,7 +220,7 @@ function buildFixes(
       for (const reference of variable.references) {
         fixes.push(
           fixer.replaceText(
-            reference.identifier as import('estree').Identifier,
+            reference.identifier as Identifier,
             `${defaultName}.${memberName}`
           ),
         );
@@ -242,7 +241,7 @@ function buildFixes(
 
           fixes.push(
             fixer.replaceText(
-              reference.identifier as import('estree').Identifier,
+              reference.identifier as Identifier,
               defaultName
             ),
           );

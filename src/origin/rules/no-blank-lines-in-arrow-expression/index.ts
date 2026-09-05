@@ -1,4 +1,4 @@
-import type { RuleFixer, RuleModule } from '#plugin-types';
+import type { ArrowFunctionExpression, RuleFixer, RuleModule } from '#plugin-types';
 
 import { getArrowToken, hasBlankLine } from '#utils/chain';
 
@@ -17,7 +17,7 @@ const rule: RuleModule = {
   create(context) {
     const sourceCode = context.sourceCode;
 
-    function normalizeArrowBody(node: import('estree').ArrowFunctionExpression) {
+    function normalizeArrowBody(node: ArrowFunctionExpression) {
       if (node.body.type === 'BlockStatement') {
         return;
       }

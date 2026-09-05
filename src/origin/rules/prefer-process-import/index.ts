@@ -1,4 +1,4 @@
-import type { LintNode, RuleFixer, RuleModule, SourceCode } from '#plugin-types';
+import type { Identifier, ImportDeclaration, LintNode, RuleFixer, RuleModule, SourceCode } from '#plugin-types';
 
 const rule: RuleModule = {
   meta: {
@@ -17,7 +17,7 @@ const rule: RuleModule = {
     let hasProcessImport = false;
     let reported = false;
 
-    function usesProcessImport(node: import('estree').ImportDeclaration) {
+    function usesProcessImport(node: ImportDeclaration) {
       return (
         node.type === 'ImportDeclaration'
         && node.source.value === 'node:process'
@@ -29,7 +29,7 @@ const rule: RuleModule = {
       );
     }
 
-    function isGlobalProcess(node: import('estree').Identifier & { parent?: LintNode }) {
+    function isGlobalProcess(node: Identifier & { parent?: LintNode }) {
       if (node.name !== 'process') {
         return false;
       }

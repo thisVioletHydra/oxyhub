@@ -1,4 +1,4 @@
-import type { RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
+import type { IfStatement, LintNode, RuleFixer, RuleModule, SourceCode, SwitchStatement, Token, WhileStatement } from '#plugin-types';
 
 type BlockMark =
   | { type: 'program' }
@@ -8,9 +8,9 @@ type BlockMark =
 type TextEdit = { start: number; end: number; text: string };
 
 type ConditionNode =
-  | import('estree').IfStatement
-  | import('estree').WhileStatement
-  | import('estree').SwitchStatement;
+  | IfStatement
+  | WhileStatement
+  | SwitchStatement;
 
 function getLineIndentFromLines(
   lines: string[],
@@ -33,7 +33,7 @@ function isTokenOnSameLine(
 
 function markStatement(
   sourceCode: SourceCode,
-  node: import('estree').Node,
+  node: LintNode,
   marks: Map<number, BlockMark>,
   mark: BlockMark
 ) {
@@ -50,41 +50,9 @@ function markStatement(
   );
 }
 
-function applyEdits(
-  text: string,
-  edits: TextEdit[]
-) {
-  const ordered = [
-    ...edits
-  ].sort(
-    (
-      left,
-      right
-    ) => {
-      if (right.start !== left.start) {
-        return right.start - left.start;
-      }
-
-      return right.end - left.end;
-    }
-  );
-  let next = text;
-
-  for (const edit of ordered) {
-    next = `${next.slice(
-      0,
-      edit.start
-    )}${edit.text}${next.slice(
-      edit.end
-    )}`;
-  }
-
-  return next;
-}
-
 function collapseConditionSpacing(
   sourceCode: SourceCode,
-  testNode: import('estree').Node,
+  testNode: LintNode,
   edits: TextEdit[]
 ) {
   const testFirst = sourceCode.getFirstToken(
@@ -184,7 +152,7 @@ const rule: RuleModule = {
     }
 
     function collectSameLineSplits(
-      body: Array<import('estree').Node>,
+      body: Array<LintNode>,
       statementIndent: string
     ) {
       for (let index = 1; index < body.length; index += 1) {
@@ -215,7 +183,7 @@ const rule: RuleModule = {
       }
     }
 
-    function visitBlock(node: import('estree').BlockStatement | import('estree').StaticBlock) {
+    function visitBlock(node: LintNode) {
       const openBrace = sourceCode.getFirstToken(
         node
       );
@@ -230,15 +198,20 @@ const rule: RuleModule = {
         type: 'block' as const,
         braceLine: openBrace.loc.start.line,
       };
+      const body = Array.isArray(
+        node.body
+      )
+        ? node.body as LintNode[]
+        : [];
 
       collectSameLineSplits(
-        node.body,
+        body,
         bodyIndentForBlock(
           openBrace
         )
       );
 
-      for (const statement of node.body) {
+      for (const statement of body) {
         const firstToken = sourceCode.getFirstToken(
           statement
         );
@@ -501,46 +474,55 @@ const rule: RuleModule = {
           );
         }
 
-        let nextText = applyEdits(
-          original,
-          edits
-        );
-        const hadFinalNewline = original.endsWith(
-          '\n'
-        );
-        if (hadFinalNewline && !nextText.endsWith(
-          '\n'
-        )) {
-          nextText += '\n';
-        }
+        const reported: TextEdit[] = [];
 
-        const collapsed = nextText.replace(
-          /\n{3,}/g,
-          '\n\n'
-        );
-        if (collapsed !== nextText) {
-          nextText = collapsed;
-        }
-
-        if (nextText === original) {
-          return;
-        }
-
-        context.report(
-          {
-            node,
-            messageId: 'badWhitespace',
-            fix(fixer: RuleFixer) {
-              return fixer.replaceTextRange(
-                [
-                  0,
-                  original.length
-                ],
-                nextText
-              );
-            },
+        for (const edit of edits) {
+          if (edit.start === edit.end && edit.text === '') {
+            continue;
           }
-        );
+
+          const actual = original.slice(
+            edit.start,
+            edit.end
+          );
+          if (actual === edit.text) {
+            continue;
+          }
+
+          const overlaps = reported.some(
+            (previous) => edit.start < previous.end && previous.start < edit.end
+          );
+          if (overlaps) {
+            continue;
+          }
+
+          reported.push(
+            edit
+          );
+          context.report(
+            {
+              node,
+              loc: {
+                start: sourceCode.getLocFromIndex(
+                  edit.start
+                ),
+                end: sourceCode.getLocFromIndex(
+                  edit.end
+                ),
+              },
+              messageId: 'badWhitespace',
+              fix(fixer: RuleFixer) {
+                return fixer.replaceTextRange(
+                  [
+                    edit.start,
+                    edit.end
+                  ],
+                  edit.text
+                );
+              },
+            }
+          );
+        }
       },
     };
   },

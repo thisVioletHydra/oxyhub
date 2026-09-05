@@ -1,4 +1,4 @@
-import type { LintNode, RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
+import type { CallExpression, LintNode, RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
 
 import {
   getLineIndent,
@@ -7,7 +7,7 @@ import {
   isTokenOnSameLine,
 } from '#utils/function-params';
 
-type CallNode = import('estree').CallExpression & {
+type CallNode = CallExpression & {
   typeArguments?: LintNode;
 };
 

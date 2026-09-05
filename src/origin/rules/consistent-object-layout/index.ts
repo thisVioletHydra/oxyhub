@@ -1,12 +1,12 @@
-import type { LintNode, RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
+import type { ArrayExpression, ArrayPattern, LintNode, ObjectExpression, ObjectPattern, RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
 
 import { getLineIndent, isTokenOnSameLine } from '#utils/function-params';
 
 type ContainerNode =
-  | import('estree').ObjectExpression
-  | import('estree').ArrayExpression
-  | import('estree').ObjectPattern
-  | import('estree').ArrayPattern;
+  | ObjectExpression
+  | ArrayExpression
+  | ObjectPattern
+  | ArrayPattern;
 
 function getDelimiters(
   sourceCode: SourceCode,
@@ -218,7 +218,7 @@ const rule: RuleModule = {
         open
       );
 
-      if (multilineIntent === null || multilineIntent === undefined) {
+      if (multilineIntent === false) {
         collapseInline(
           node,
           open,

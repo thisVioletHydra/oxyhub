@@ -1,4 +1,4 @@
-import type { LintNode, RuleModule } from '#plugin-types';
+import type { CallExpression, LintNode, RuleModule } from '#plugin-types';
 
 function isVoidWrapped(node: LintNode | null | undefined) {
   return (
@@ -45,11 +45,11 @@ function isAwaited(node: LintNode | null | undefined) {
   return false;
 }
 
-function thenHasRejectionHandler(thenCall: import('estree').CallExpression) {
+function thenHasRejectionHandler(thenCall: CallExpression) {
   return thenCall.arguments.length >= 2;
 }
 
-function chainHasCatchAfter(thenCall: import('estree').CallExpression & { parent?: LintNode | null }) {
+function chainHasCatchAfter(thenCall: CallExpression & { parent?: LintNode | null }) {
   let current: LintNode | null | undefined = thenCall.parent;
   while (current) {
     if (
@@ -79,7 +79,7 @@ function chainHasCatchAfter(thenCall: import('estree').CallExpression & { parent
 
 function walkExpression(
   node: LintNode | null | undefined,
-  visitThenCall: (thenCall: import('estree').CallExpression & { parent?: LintNode | null }) => void
+  visitThenCall: (thenCall: CallExpression & { parent?: LintNode | null }) => void
 ) {
   if (!node || typeof node.type !== 'string') {
     return;

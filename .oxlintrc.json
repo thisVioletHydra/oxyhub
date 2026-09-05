@@ -8,8 +8,33 @@
     "src/arthouse/snap/**",
     "src/arthouse/seeds/**"
   ],
+  "plugins": [
+    "typescript",
+    "import",
+    "unicorn"
+  ],
   "jsPlugins": ["@oxyhub/oxlint-plugin"],
   "rules": {
+    "eqeqeq": [
+      "error",
+      "always"
+    ],
+    "no-negated-condition": "warn",
+    "id-length": "off",
+    "import/newline-after-import": "warn",
+    "import/consistent-type-specifier-style": [
+      "error",
+      "prefer-top-level"
+    ],
+    "typescript/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "fixStyle": "separate-type-imports"
+      }
+    ],
+    "typescript/no-floating-promises": "off",
+    "unicorn/prefer-node-protocol": "error",
     "oxyhub/consistent-block-indent": "error",
     "oxyhub/consistent-call-arguments": "error",
     "oxyhub/consistent-chain-layout": "error",

@@ -1,6 +1,6 @@
-import type { LintNode, RuleFixer, RuleModule, SourceCode } from '#plugin-types';
+import type { Expression, IfStatement, LintNode, RuleFixer, RuleModule, SourceCode, UnaryExpression } from '#plugin-types';
 
-function getBangExpression(node: LintNode): import('estree').UnaryExpression | null {
+function getBangExpression(node: LintNode): UnaryExpression | null {
   if (node.type === 'UnaryExpression' && node.operator === '!' && node.prefix) {
     return node;
   }
@@ -170,7 +170,7 @@ function isDefinitelyBooleanExpression(node: LintNode): boolean {
  * Safe local replace only — never rewrite surrounding control flow.
  */
 function renderNullishCheck(
-  argument: import('estree').Expression,
+  argument: Expression,
   sourceCode: SourceCode
 ) {
   const argumentText = sourceCode.getText(
@@ -204,7 +204,7 @@ const rule: RuleModule = {
   create(context) {
     const sourceCode = context.sourceCode;
 
-    function checkIfStatement(node: import('estree').IfStatement) {
+    function checkIfStatement(node: IfStatement) {
       const bang = getBangExpression(
         node.test as LintNode
       );
