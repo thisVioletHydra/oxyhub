@@ -19,6 +19,11 @@
     "lint",
     "plugin"
   ],
+  "imports": {
+    "#plugin-types": "./src/origin/plugin-types.ts",
+    "#rules/*": "./src/origin/rules/*.ts",
+    "#utils/*": "./src/origin/utils/*.ts"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
@@ -32,7 +37,14 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "lint": "pnpm build && oxlint src/origin",
+    "lint:fix": "pnpm build && oxlint --fix src/origin",
+    "test": "vitest run",
+    "punish": "node src/painRoom/punish.ts",
+    "punish:once": "node src/painRoom/punish.ts --once",
+    "release": "bumpp",
+    "typecheck": "tsc --noEmit"
   },
   "publishConfig": {
     "access": "public"
@@ -41,14 +53,18 @@
     "oxlint": "^1.79.0"
   },
   "devDependencies": {
+    "@oxyhub/oxlint-plugin": "workspace:*",
     "@types/estree": "^1.0.9",
+    "@types/node": "^26.4.1",
+    "bumpp": "^12.3.0",
     "eslint": "^10.9.1",
     "oxlint": "^1.81.0",
-    "tsdown": "^0.16.8",
-    "typescript": "^5.9.3"
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "packageManager": "pnpm@11.22.0"
 }

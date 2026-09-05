@@ -1,0 +1,12 @@
+shellEmulator: true
+trustPolicy: no-downgrade
+
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - tsdown@0.23.0
+
+packages:
+  - '.'
+
+allowBuilds:
+  esbuild: true

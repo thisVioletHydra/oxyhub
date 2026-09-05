@@ -2,3 +2,10 @@ node_modules
 dist
 *.tgz
 .DS_Store
+src/arthouse/dist/
+src/arthouse/snap/
+src/arthouse/seeds/
+src/arthouse/state.json
+src/arthouse/tsconfig.json
+src/arthouse/.punish.oxlintrc.json
+src/painRoom/.punish-cache.json

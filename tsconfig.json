@@ -1,9 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022"],
+    "target": "ES2024",
+    "lib": ["ES2024"],
+    "types": ["node"],
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "paths": {
+      "*": ["./*"],
+      "#plugin-types": ["./src/origin/plugin-types.ts"],
+      "#rules/*": ["./src/origin/rules/*"],
+      "#utils/*": ["./src/origin/utils/*"]
+    },
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
@@ -15,5 +22,5 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["src"]
+  "include": ["src/origin", "src/painRoom"]
 }
