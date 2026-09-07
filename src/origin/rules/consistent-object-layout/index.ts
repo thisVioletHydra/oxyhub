@@ -1,6 +1,6 @@
 import type { ArrayExpression, ArrayPattern, LintNode, ObjectExpression, ObjectPattern, RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
 
-import { getLineIndent, isTokenOnSameLine } from '#utils/function-params';
+import { getLineIndent, isTokenOnSameLine } from '#layout/tokens';
 
 type ContainerNode =
   | ObjectExpression

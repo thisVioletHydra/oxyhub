@@ -16,6 +16,7 @@ import noBlankLinesInChain from '#rules/no-blank-lines-in-chain';
 import noFloatingPromise from '#rules/no-floating-promise';
 import noNodeNamedImport from '#rules/no-node-named-import';
 import paddingLineBeforeDecorator from '#rules/padding-line-before-decorator';
+import paddingLineBeforeFor from '#rules/padding-line-before-for';
 import paddingLineBeforeReturn from '#rules/padding-line-before-return';
 import preferFsPromises from '#rules/prefer-fs-promises';
 import preferNodeDefaultName from '#rules/prefer-node-default-name';
@@ -43,6 +44,7 @@ const plugin = {
     'no-floating-promise': noFloatingPromise,
     'no-node-named-import': noNodeNamedImport,
     'padding-line-before-decorator': paddingLineBeforeDecorator,
+    'padding-line-before-for': paddingLineBeforeFor,
     'padding-line-before-return': paddingLineBeforeReturn,
     'prefer-fs-promises': preferFsPromises,
     'prefer-node-default-name': preferNodeDefaultName,

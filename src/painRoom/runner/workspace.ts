@@ -9,12 +9,12 @@ import {
   originDir,
   painRoomDir,
   prefix,
-  root,
   seedsDir,
   snapDir,
   statePath,
 } from './paths.ts';
 
+import lintConfig from '../../../oxlint.config.ts';
 import fsPromises from 'node:fs/promises';
 import path from 'node:path';
 
@@ -70,7 +70,7 @@ export async function listPluginTs(dir: string) {
       out.push(name);
     }
   }
-  for (const folder of ['rules', 'utils']) {
+  for (const folder of ['rules', 'layout', 'imports']) {
     const full = path.join(dir, folder);
     if (await exists(full)) {
       out.push(...await listTsFiles(full, dir));
@@ -86,8 +86,11 @@ function fileKind(rel: string): FileKind {
   if (rel.startsWith('rules/') || rel.startsWith('rules\\')) {
     return 'rule';
   }
-  if (rel.startsWith('utils/') || rel.startsWith('utils\\')) {
-    return 'util';
+  if (rel.startsWith('layout/') || rel.startsWith('layout\\')) {
+    return 'layout';
+  }
+  if (rel.startsWith('imports/') || rel.startsWith('imports\\')) {
+    return 'imports';
   }
 
   return 'other';
@@ -100,10 +103,18 @@ const toRelative: Record<FileKind, Array<[string, string]>> = {
   ],
   rule: [
     ["from '#plugin-types'", "from '../../plugin-types'"],
-    ["from '#utils/", "from '../../utils/"],
+    ["from '#layout/", "from '../../layout/"],
+    ["from '#imports/", "from '../../imports/"],
   ],
-  util: [
+  layout: [
     ["from '#plugin-types'", "from '../plugin-types'"],
+    ["from '#layout/", "from './"],
+    ["from '#imports/", "from '../imports/"],
+  ],
+  imports: [
+    ["from '#plugin-types'", "from '../plugin-types'"],
+    ["from '#imports/", "from './"],
+    ["from '#layout/", "from '../layout/"],
   ],
   other: [],
 };
@@ -115,10 +126,18 @@ const toHash: Record<FileKind, Array<[string, string]>> = {
   ],
   rule: [
     ["from '../../plugin-types'", "from '#plugin-types'"],
-    ["from '../../utils/", "from '#utils/"],
+    ["from '../../layout/", "from '#layout/"],
+    ["from '../../imports/", "from '#imports/"],
   ],
-  util: [
+  layout: [
     ["from '../plugin-types'", "from '#plugin-types'"],
+    ["from './", "from '#layout/"],
+    ["from '../imports/", "from '#imports/"],
+  ],
+  imports: [
+    ["from '../plugin-types'", "from '#plugin-types'"],
+    ["from './", "from '#imports/"],
+    ["from '../layout/", "from '#layout/"],
   ],
   other: [],
 };
@@ -247,7 +266,7 @@ export async function writePunishConfig(rule: RuleItem) {
   const key = `${prefix}/${rule.id}`;
   await writeJson(configPath, {
     plugins: [],
-    jsPlugins: ['./dist/index.mjs'],
+    jsPlugins: ['./dist/index.js'],
     ignorePatterns: ['**/seeds/**', '**/snap/**', '**/dist/**'],
     rules: {
       [key]: rule.options === undefined ? 'error' : ['error', rule.options],
@@ -255,10 +274,24 @@ export async function writePunishConfig(rule: RuleItem) {
   });
 }
 
+type LintRulesConfig = {
+  extends?: Array<{ rules?: Record<string, unknown> }>;
+  rules?: Record<string, unknown>;
+};
+
+function flattenRules(config: LintRulesConfig) {
+  const merged: Record<string, unknown> = {};
+
+  for (const ext of config.extends ?? []) {
+    Object.assign(merged, ext.rules ?? {});
+  }
+  Object.assign(merged, config.rules ?? {});
+
+  return merged;
+}
+
 export async function listRules(): Promise<RuleItem[]> {
-  const oxlintConfig = JSON.parse(await fsPromises.readFile(path.join(root, '.oxlintrc.json'), 'utf8')) as {
-    rules?: Record<string, unknown>;
-  };
+  const oxlintRules = flattenRules(lintConfig);
   const seeded = new Set(await painRoomRuleDirs());
   const rulesDir = path.join(originDir, 'rules');
   const fromFiles = new Set<string>();
@@ -271,7 +304,7 @@ export async function listRules(): Promise<RuleItem[]> {
   const rules: RuleItem[] = [];
   const seen = new Set<string>();
 
-  for (const [key, setting] of Object.entries(oxlintConfig.rules ?? {})) {
+  for (const [key, setting] of Object.entries(oxlintRules)) {
     if (!key.startsWith(`${prefix}/`)) {
       continue;
     }

@@ -6,14 +6,17 @@ import crypto from 'node:crypto';
 import fsPromises from 'node:fs/promises';
 import path from 'node:path';
 
-const HASH_IMPORT = /from ['"](#(?:plugin-types|utils\/[^'"]+))['"]/g;
+const HASH_IMPORT = /from ['"](#(?:plugin-types|layout\/[^'"]+|imports\/[^'"]+))['"]/g;
 
 function specToPath(spec: string) {
   if (spec === '#plugin-types') {
     return path.join(originDir, 'plugin-types.ts');
   }
+  if (spec.startsWith('#layout/')) {
+    return path.join(originDir, 'layout', `${spec.slice('#layout/'.length)}.ts`);
+  }
 
-  return path.join(originDir, 'utils', `${spec.slice('#utils/'.length)}.ts`);
+  return path.join(originDir, 'imports', `${spec.slice('#imports/'.length)}.ts`);
 }
 
 async function exists(filePath: string) {

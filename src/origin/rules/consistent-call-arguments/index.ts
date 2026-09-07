@@ -5,7 +5,7 @@ import {
   isOpeningParenToken,
   isClosingParenToken,
   isTokenOnSameLine,
-} from '#utils/function-params';
+} from '#layout/tokens';
 
 type CallNode = CallExpression & {
   typeArguments?: LintNode;

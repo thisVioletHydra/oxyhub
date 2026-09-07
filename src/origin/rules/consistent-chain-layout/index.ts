@@ -4,8 +4,8 @@ import {
   collectChainExpressions,
   getChainLinkRange,
   walkMemberChain,
-} from '#utils/chain';
-import { getLineIndent, isTokenOnSameLine } from '#utils/function-params';
+} from '#layout/chain';
+import { getLineIndent, isTokenOnSameLine } from '#layout/tokens';
 
 function isMethodLink(memberNode: MemberExpression & { parent?: LintNode | null }) {
   const parent = memberNode.parent;

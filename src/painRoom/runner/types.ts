@@ -27,4 +27,4 @@ export type RuleCacheEntry = {
   passedAt: string;
 };
 
-export type FileKind = 'index' | 'rule' | 'util' | 'other';
+export type FileKind = 'index' | 'rule' | 'layout' | 'imports' | 'other';

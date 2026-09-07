@@ -4,8 +4,8 @@ import {
   getImportGroup,
   getTopImportBlock,
   ImportGroup,
-} from '#utils/import-groups';
-import { hasNodeNamedValueImport } from '#utils/node-imports';
+} from '#imports/groups';
+import { hasNodeNamedValueImport } from '#imports/specifiers';
 
 const GROUP_ORDER = [
   ImportGroup.TYPE,

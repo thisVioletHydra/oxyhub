@@ -1,6 +1,6 @@
 import type { RuleFixer, RuleModule } from '#plugin-types';
 
-import { KNOWN_NODE_DEFAULT_NAMES } from '#utils/node-default-import-name';
+import { KNOWN_NODE_DEFAULT_NAMES } from '#imports/specifiers';
 
 const rule: RuleModule = {
   meta: {

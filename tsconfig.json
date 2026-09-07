@@ -9,7 +9,8 @@
       "*": ["./*"],
       "#plugin-types": ["./src/origin/plugin-types.ts"],
       "#rules/*": ["./src/origin/rules/*/index.ts"],
-      "#utils/*": ["./src/origin/utils/*"]
+      "#layout/*": ["./src/origin/layout/*"],
+      "#imports/*": ["./src/origin/imports/*"]
     },
     "strict": true,
     "noEmit": true,
@@ -23,5 +24,5 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["src/origin", "src/painRoom"]
+  "include": ["src/origin", "src/painRoom", "oxlint.config.ts"]
 }

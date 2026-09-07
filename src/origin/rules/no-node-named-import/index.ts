@@ -3,17 +3,15 @@ import type { Identifier, ImportDeclaration, ImportDefaultSpecifier, ImportSpeci
 import {
   getTopImportBlock,
   ImportGroup,
-} from '#utils/import-groups';
+} from '#imports/groups';
 import {
   getImportQuote,
   getImportedBindingName,
   getNodeDefaultImportName,
-} from '#utils/node-default-import-name';
-import {
   getScopeVariable,
   hasNamedValueImport,
   isNodeValueImport,
-} from '#utils/node-imports';
+} from '#imports/specifiers';
 
 const GROUP_ORDER = [
   ImportGroup.TYPE,

@@ -1,6 +1,6 @@
 import type { ConditionalExpression, LintNode, RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
 
-import { getLineIndent, isTokenOnSameLine } from '#utils/function-params';
+import { getLineIndent, isTokenOnSameLine } from '#layout/tokens';
 
 /**
  * Parentheses around a ternary branch are outside the AST node range.

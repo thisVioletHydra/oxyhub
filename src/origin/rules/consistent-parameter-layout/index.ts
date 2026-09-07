@@ -7,7 +7,7 @@ import {
   getParameterStartToken,
   isParameterNode,
   isTokenOnSameLine,
-} from '#utils/function-params';
+} from '#layout/tokens';
 
 const rule: RuleModule = {
   meta: {

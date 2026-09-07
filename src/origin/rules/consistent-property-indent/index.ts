@@ -1,6 +1,6 @@
 import type { LintNode, RuleFixer, RuleModule, SourceCode, Token } from '#plugin-types';
 
-import { getLineIndent, isTokenOnSameLine } from '#utils/function-params';
+import { getLineIndent, isTokenOnSameLine } from '#layout/tokens';
 
 function getOpeningDelimiter(
   sourceCode: SourceCode,

@@ -1,7 +1,7 @@
 {
   "name": "@oxyhub/oxlint-plugin",
   "version": "0.1.2",
-  "description": "Oxlint plugin: layout, Node.js imports, and boolean-condition rules",
+  "description": "Oxlint plugin: layout, TypeScript conventions, and correctness rules",
   "type": "module",
   "license": "MIT",
   "author": "thisVioletHydra",
@@ -22,21 +22,27 @@
   "imports": {
     "#plugin-types": "./src/origin/plugin-types.ts",
     "#rules/*": "./src/origin/rules/*/index.ts",
-    "#utils/*": "./src/origin/utils/*.ts"
+    "#layout/*": "./src/origin/layout/*.ts",
+    "#imports/*": "./src/origin/imports/*.ts"
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
-    }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
+    },
+    "./recommended.json": "./dist/recommended.json"
   },
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node src/origin/write-recommended.ts",
     "prepublishOnly": "pnpm build",
     "lint": "pnpm build && oxlint src/origin src/painRoom",
     "lint:fix": "pnpm build && oxlint --fix src/origin src/painRoom",

@@ -4,7 +4,7 @@ import {
   isClosingParenToken,
   isOpeningParenToken,
   isTokenOnSameLine,
-} from '#utils/function-params';
+} from '#layout/tokens';
 
 function getTestParens(
   sourceCode: SourceCode,

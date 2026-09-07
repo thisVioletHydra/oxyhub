@@ -1,6 +1,6 @@
 import type { ImportDeclaration, LintNode, MemberExpression, RuleModule } from '#plugin-types';
 
-import { getScopeVariable } from '#utils/node-imports';
+import { getScopeVariable } from '#imports/specifiers';
 
 const FS_MODULE = 'node:fs';
 const FS_BINDING = 'fs';

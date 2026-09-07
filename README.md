@@ -5,7 +5,7 @@
 [![node](https://img.shields.io/node/v/@oxyhub/oxlint-plugin.svg?style=flat-square)](https://www.npmjs.com/package/@oxyhub/oxlint-plugin)
 [![license](https://img.shields.io/npm/l/@oxyhub/oxlint-plugin.svg?style=flat-square)](./LICENSE)
 
-Oxlint JS plugin. One layout, one way to import Node builtins, no sloppy `if (!x)` or floating promises.
+Oxlint JS plugin. One layout, TS conventions (`node:` imports included), no sloppy `if (!x)` or floating promises.
 
 > Rule ids start with `oxyhub/`
 
@@ -41,48 +41,58 @@ pnpm add -D oxlint @oxyhub/oxlint-plugin
 
 ## Configuration
 
-Add the plugin, then turn on rules under `oxyhub/*`.
+All plugin rules are on by default. Extend the shipped config, then override only what you want off.
 
-```json
-{
-  "jsPlugins": ["@oxyhub/oxlint-plugin"],
-  "rules": {
-    "oxyhub/consistent-block-indent": "error",
-    "oxyhub/consistent-call-arguments": "error",
-    "oxyhub/consistent-chain-layout": "error",
-    "oxyhub/consistent-condition-spacing": "error",
-    "oxyhub/consistent-object-layout": "error",
-    "oxyhub/consistent-parameter-layout": "error",
-    "oxyhub/consistent-property-indent": "error",
-    "oxyhub/consistent-ternary-layout": "error",
-    "oxyhub/id-length": [
-      "error",
-      {
-        "min": 2,
-        "exceptions": ["i", "j", "f", "_", "t"],
-        "exceptionPatterns": ["^[A-Z]$"],
-        "properties": "never"
-      }
-    ],
-    "oxyhub/import-layout": "error",
-    "oxyhub/no-bang-condition": "error",
-    "oxyhub/no-blank-lines-in-arrow-expression": "error",
-    "oxyhub/no-blank-lines-in-chain": "error",
-    "oxyhub/no-floating-promise": "error",
-    "oxyhub/no-node-named-import": "error",
-    "oxyhub/padding-line-before-decorator": "error",
-    "oxyhub/padding-line-before-return": "error",
-    "oxyhub/prefer-fs-promises": "error",
-    "oxyhub/prefer-node-default-name": "error",
-    "oxyhub/prefer-object-arrow-method": "error",
-    "oxyhub/prefer-process-import": "error"
-  }
-}
+```ts
+import { defineConfig } from 'oxlint';
+
+import oxyhub from '@oxyhub/oxlint-plugin/config';
+
+export default defineConfig({
+  extends: [oxyhub],
+});
 ```
 
-## Rules (21)
+Turn a rule off only when you have to:
+
+```ts
+export default defineConfig({
+  extends: [oxyhub],
+  rules: {
+    'oxyhub/prefer-object-arrow-method': 'off',
+  },
+});
+```
+
+JSON still works: `"extends": ["./node_modules/@oxyhub/oxlint-plugin/recommended.json"]`. One config file per directory — JSON or TS, not both.
+
+## Rules (22)
+
+### Problem (2)
+
+Bugs. Default: `error`.
+
+| Rule | Description |
+| --- | --- |
+| `no-bang-condition` | `!` only on real booleans. Token getters fix to `=== null`; anything else to a full nullish check. |
+| `no-floating-promise` | Floating promise chains need `.catch`, `void`, `await`, or `return`. |
+
+### Convention (6)
+
+How to write TypeScript. Default: `error`.
+
+| Rule | Description |
+| --- | --- |
+| `id-length` | Minimum identifier length. `let` / `const` bindings are ignored. |
+| `prefer-object-arrow-method` | Object methods as `key: (args) => {}`, not `key() {}`. |
+| `prefer-process-import` | Use `import process from "node:process"` instead of the global. |
+| `prefer-fs-promises` | Prefer `fsPromises` over blocking `fs` sync methods. |
+| `prefer-node-default-name` | Conventional default import names (`process`, `path`, `fs`, `fsPromises`). |
+| `no-node-named-import` | No named value imports from `node:` builtins. |
 
 ### Layout (14)
+
+Indent, wrapping, blank lines. `consistent-*` and blank-in-* default to `error`. `padding-line-*` default to `warn`.
 
 | Rule | Description |
 | --- | --- |
@@ -98,25 +108,8 @@ Add the plugin, then turn on rules under `oxyhub/*`.
 | `no-blank-lines-in-arrow-expression` | No blank line between `=>` and an expression body. |
 | `no-blank-lines-in-chain` | No blank lines inside a member call chain. |
 | `padding-line-before-decorator` | Blank line before a decorator, unless stacked on another decorator. |
+| `padding-line-before-for` | Blank line before `for` / `for-in` / `for-of` unless it is the first statement in the block. |
 | `padding-line-before-return` | Blank line before `return` when the function has more than one return. |
-| `prefer-object-arrow-method` | Object methods as `key: (args) => {}`, not `key() {}`. |
-
-### Node.js (4)
-
-| Rule | Description |
-| --- | --- |
-| `prefer-process-import` | Use `import process from "node:process"` instead of the global. |
-| `prefer-fs-promises` | Prefer `fsPromises` over blocking `fs` sync methods. |
-| `prefer-node-default-name` | Conventional default import names (`process`, `path`, `fs`, `fsPromises`). |
-| `no-node-named-import` | No named value imports from `node:` builtins. |
-
-### Language (3)
-
-| Rule | Description |
-| --- | --- |
-| `no-bang-condition` | `!` only on real booleans. Token getters fix to `=== null`; anything else to a full nullish check. |
-| `no-floating-promise` | Floating promise chains need `.catch`, `void`, `await`, or `return`. |
-| `id-length` | Minimum identifier length. `let` / `const` bindings are ignored. |
 
 ## Settings
 

@@ -1,6 +1,6 @@
 import type { ArrowFunctionExpression, RuleFixer, RuleModule } from '#plugin-types';
 
-import { getArrowToken, hasBlankLine } from '#utils/chain';
+import { getArrowToken, hasBlankLine } from '#layout/chain';
 
 const rule: RuleModule = {
   meta: {
