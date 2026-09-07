@@ -1,6 +1,6 @@
 {
   "name": "@oxyhub/oxlint-plugin",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Oxlint plugin: layout, TypeScript conventions, and correctness rules",
   "type": "module",
   "license": "MIT",
