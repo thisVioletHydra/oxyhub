@@ -1,6 +1,3 @@
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-
 import {
   loadCache,
   markPassed,
@@ -10,14 +7,7 @@ import {
 } from './runner/cache.ts';
 import { ansi, die, log, paint, spinner } from './runner/log.ts';
 import { arthouseDir, once, painRoomDir, prefix, promote, ruleWorker, ruleWorkerRel } from './runner/paths.ts';
-import {
-  blockUntilTypesGreen,
-  buildRootDist,
-  printBlocker,
-  waitForHands,
-  waitUntilSigint,
-  whip,
-} from './runner/whip.ts';
+import {  blockUntilTypesGreen,  buildRootDist,  printBlocker,  waitForHands,  waitUntilSigint,  whip,} from './runner/whip.ts';
 import {
   copySeeds,
   includeInProgress,
@@ -30,33 +20,41 @@ import {
   writeState,
 } from './runner/workspace.ts';
 
+import process from 'node:process';
+import fsPromises from 'node:fs/promises';
+import path from 'node:path';
+
 async function main() {
   process.on('SIGINT', () => die(130));
   process.on('SIGTERM', () => die(130));
 
   if (process.argv.includes('--fresh')) {
-    wipeArthouse();
-    wipeCache();
+    await wipeArthouse();
+    await wipeCache();
     log('punish --fresh · cache dropped');
   }
 
-  const rules = listRules();
+  const rules = await listRules();
   log(`punish ${once ? 'once' : 'watch'} · ${rules.length} rules`);
 
-  const cache = loadCache();
+  const cache = await loadCache();
   const whipped = new Set<string>();
 
   if (promote) {
-    if (!existsSync(join(arthouseDir, 'index.ts'))) {
+    try {
+      await fsPromises.access(path.join(arthouseDir, 'index.ts'));
+    }
+    catch {
       log('no arthouse. nothing to promote.');
       process.exit(1);
     }
     await blockUntilTypesGreen('arthouse');
-    promoteArthouseToOrigin();
+    await promoteArthouseToOrigin();
     await buildRootDist();
-    refreshCacheAfterOriginWrite(cache, rules, new Set(rules.map(rule => rule.id)));
-    wipeArthouse();
+    await refreshCacheAfterOriginWrite(cache, rules, new Set(rules.map(rule => rule.id)));
+    await wipeArthouse();
     log('origin updated from arthouse.');
+
     return;
   }
 
@@ -67,17 +65,18 @@ async function main() {
 
   await blockUntilTypesGreen('origin');
 
-  const queue = includeInProgress(staleRules(rules, cache), rules);
+  const queue = await includeInProgress(await staleRules(rules, cache), rules);
   log(`${queue.length} stale · ${rules.length - queue.length} cached`);
 
   spinner.start('punish  stage arthouse');
-  const stage = prepareWorkspace(queue);
+  const stage = await prepareWorkspace(queue);
   spinner.stop();
 
   if (stage.mode === 'skip' || queue.length === 0) {
-    if (!once) {
+    if (once === null || once === undefined) {
       await waitUntilSigint();
     }
+
     return;
   }
 
@@ -89,11 +88,11 @@ async function main() {
     const rule = queue[index];
     const blockerNo = index + 1;
     const label = `${blockerNo}/${queue.length}  ${prefix}/${rule.id}`;
-    writeState(index, rule.id);
+    await writeState(index, rule.id);
     const report = await whip(rule, label, pluginEntry);
     if (report.kind === 'clean') {
-      snapshot();
-      markPassed(cache, rule);
+      await snapshot();
+      await markPassed(cache, rule);
       whipped.add(rule.id);
       pluginEntry = 'src/origin/index.ts';
       index += 1;
@@ -114,29 +113,30 @@ async function main() {
 
     await waitForHands([
       ruleWorker(arthouseDir, rule.id),
-      join(painRoomDir, rule.id),
+      path.join(painRoomDir, rule.id),
     ]);
     await blockUntilTypesGreen('arthouse');
-    copySeeds();
+    await copySeeds();
     pluginEntry = 'src/arthouse/index.ts';
   }
 
   await blockUntilTypesGreen('arthouse');
-  saveCache(cache);
+  await saveCache(cache);
 
-  if (!once) {
+  if (once === null || once === undefined) {
     spinner.start('punish  promote origin');
-    promoteArthouseToOrigin();
+    await promoteArthouseToOrigin();
     spinner.stop();
     await buildRootDist();
-    refreshCacheAfterOriginWrite(cache, rules, whipped);
-    wipeArthouse();
+    await refreshCacheAfterOriginWrite(cache, rules, whipped);
+    await wipeArthouse();
     log(`${paint(ansi.cyan, 'queue empty.')} origin updated.`);
     await waitUntilSigint();
+
     return;
   }
 
-  wipeArthouse();
+  await wipeArthouse();
   spinner.stop();
   log(`${paint(ansi.cyan, 'queue empty.')} origin untouched.`);
 }

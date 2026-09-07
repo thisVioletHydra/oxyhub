@@ -1,6 +1,8 @@
-import { spawn, type ChildProcess } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
 
 import { root } from './paths.ts';
+
+import child_process from 'node:child_process';
 
 let currentChild: ChildProcess | null = null;
 
@@ -10,7 +12,7 @@ export function killCurrentChild() {
 
 export function run(command: string, args: string[], cwd = root) {
   return new Promise<{ status: number; stdout: string; stderr: string }>((resolve, reject) => {
-    const child = spawn(command, args, {
+    const child = child_process.spawn(command, args, {
       cwd,
       stdio: ['ignore', 'pipe', 'pipe'],
     });

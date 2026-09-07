@@ -20,6 +20,7 @@ README на каждое правило не заводим: сгниёт. Ищ�
 | `no-blank-lines-in-arrow-expression` | No blank line between `=>` and an expression body. | — |
 | `no-blank-lines-in-chain` | No blank lines inside a member call chain. | — |
 | `padding-line-before-decorator` | Blank line before a decorator, unless stacked on another decorator. | — |
+| `padding-line-before-return` | Blank line before `return` when the function has more than one return. | — |
 | `prefer-object-arrow-method` | Object methods as `key: (args) => {}`, not `key() {}`. Off in dogfood. | — |
 
 ## Node.js
@@ -35,7 +36,7 @@ README на каждое правило не заводим: сгниёт. Ищ�
 
 | Rule | What | Options |
 | --- | --- | --- |
-| `no-bang-condition` | `!` only on real booleans. No truthiness coercion in `if` tests. | — |
+| `no-bang-condition` | `!` only on real booleans. Token getters fix to `=== null`; anything else to a full nullish check. | — |
 | `no-floating-promise` | Floating promise chains need `.catch`, `void`, `await`, or `return`. | — |
 | `id-length` | Minimum identifier length. `let` / `const` bindings ignored. | `min`, `exceptions`, `exceptionPatterns`, `properties` |
 

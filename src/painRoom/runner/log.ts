@@ -1,9 +1,11 @@
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import type { Diagnostic } from './types.ts';
 
 import { root } from './paths.ts';
 import { killCurrentChild } from './run.ts';
-import type { Diagnostic } from './types.ts';
+
+import process from 'node:process';
+import path from 'node:path';
+import url from 'node:url';
 
 const tty = process.stderr.isTTY === true;
 
@@ -28,20 +30,22 @@ export function paint(color: string, text: string) {
 }
 
 export function fileLink(relPath: string, line?: number) {
-  const abs = join(root, relPath);
+  const abs = path.join(root, relPath);
   const shown = line ? `${relPath}:${line}` : relPath;
   const label = paint(`${ansi.bold}${ansi.magenta}${ansi.underline}`, shown);
-  if (!tty) {
+  if (tty === null || tty === undefined) {
     return line ? `${abs}:${line}` : abs;
   }
-  const href = line ? `${pathToFileURL(abs).href}#${line}` : pathToFileURL(abs).href;
+  const href = line ? `${url.pathToFileURL(abs).href}#${line}` : url.pathToFileURL(abs).href;
+
   return `\x1b]8;;${href}\x1b\\${label}\x1b]8;;\x1b\\`;
 }
 
 export function hitLink(diagnostic: Diagnostic) {
-  if (!diagnostic.filename) {
+  if (diagnostic.filename === null || diagnostic.filename === undefined) {
     return '';
   }
+
   return fileLink(diagnostic.filename, diagnostic.labels?.[0]?.span?.line);
 }
 
@@ -51,7 +55,7 @@ export const spinner = {
   text: '',
   start(text: string) {
     this.text = text;
-    if (!tty) {
+    if (tty === null || tty === undefined) {
       return;
     }
     this.stopTimer();

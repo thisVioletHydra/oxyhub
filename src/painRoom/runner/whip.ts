@@ -1,7 +1,4 @@
-import { existsSync, readFileSync, watch } from 'node:fs';
-import { join, relative } from 'node:path';
-import { pathToFileURL } from 'node:url';
-import { RuleTester } from 'oxlint/plugins-dev';
+import type { Diagnostic, RuleItem, WhipReport } from './types.ts';
 
 import { ansi, fileLink, hitLink, log, paint, spinner } from './log.ts';
 import {
@@ -16,14 +13,29 @@ import {
   seedsDir,
 } from './paths.ts';
 import { run } from './run.ts';
-import type { Diagnostic, RuleItem, WhipReport } from './types.ts';
 import {
-  copySeeds,
   listPluginTs,
   snapshot,
   writeArthouseTsconfig,
   writePunishConfig,
 } from './workspace.ts';
+
+import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
+import path from 'node:path';
+import url from 'node:url';
+import { RuleTester } from 'oxlint/plugins-dev';
+
+async function exists(filePath: string) {
+  try {
+    await fsPromises.access(filePath);
+
+    return true;
+  }
+  catch {
+    return false;
+  }
+}
 
 function parseDiagnostics(stdout: string) {
   const trimmed = stdout.trim();
@@ -33,6 +45,7 @@ function parseDiagnostics(stdout: string) {
   }
   try {
     const payload = JSON.parse(trimmed.slice(start)) as { diagnostics?: Diagnostic[] };
+
     return Array.isArray(payload.diagnostics) ? payload.diagnostics : [];
   }
   catch {
@@ -54,6 +67,7 @@ function reasonOf(report: WhipReport) {
   }
   const severity = first.severity === 'warning' ? 'warning' : 'error';
   const code = String(first.code ?? 'leftover').replace(/^oxyhub\((.+)\)$/, '$1');
+
   return `${severity} ${code}`;
 }
 
@@ -73,7 +87,7 @@ function parseTscDiagnostics(stdout: string, stderr: string) {
         message: match[5],
         code: `TS${match[4]}`,
         severity: 'error',
-        filename: file.startsWith(root) ? relative(root, file) : file,
+        filename: file.startsWith(root) ? path.relative(root, file) : file,
         labels: [{ span: { line: Number(match[2]), column: Number(match[3]) } }],
       };
       continue;
@@ -118,22 +132,22 @@ async function buildPlugin(entry: string) {
 }
 
 async function runSeeds(id: string): Promise<WhipReport> {
-  const seedRoot = join(seedsDir, id);
-  if (!existsSync(join(seedRoot, 'dirty.ts'))) {
+  const seedRoot = path.join(seedsDir, id);
+  if (!(await exists(path.join(seedRoot, 'dirty.ts')))) {
     return { kind: 'clean', diagnostics: [], stderr: '' };
   }
 
   const rulePath = ruleWorker(arthouseDir, id);
-  if (!existsSync(rulePath)) {
+  if (!(await exists(rulePath))) {
     return { kind: 'crash', diagnostics: [], stderr: 'missing worker' };
   }
 
-  const imported = await import(pathToFileURL(rulePath).href) as { default: unknown };
-  const dirty = readFileSync(join(seedRoot, 'dirty.ts'), 'utf8');
-  const whipPath = join(seedRoot, 'whip.ts');
-  const gagPath = join(seedRoot, 'gag.ts');
-  const valid = existsSync(gagPath)
-    ? [{ name: 'gag', code: readFileSync(gagPath, 'utf8') }]
+  const imported = await import(url.pathToFileURL(rulePath).href) as { default: unknown };
+  const dirty = await fsPromises.readFile(path.join(seedRoot, 'dirty.ts'), 'utf8');
+  const whipPath = path.join(seedRoot, 'whip.ts');
+  const gagPath = path.join(seedRoot, 'gag.ts');
+  const valid = await exists(gagPath)
+    ? [{ name: 'gag', code: await fsPromises.readFile(gagPath, 'utf8') }]
     : [];
 
   RuleTester.describe = ((_name: string, fn: () => void) => {
@@ -157,14 +171,16 @@ async function runSeeds(id: string): Promise<WhipReport> {
       invalid: [{
         name: 'dirty',
         code: dirty,
-        output: existsSync(whipPath) ? readFileSync(whipPath, 'utf8') : null,
+        output: await exists(whipPath) ? await fsPromises.readFile(whipPath, 'utf8') : null,
         errors: 1,
       }],
     });
+
     return { kind: 'clean', diagnostics: [], stderr: '' };
   }
   catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+
     return {
       kind: 'dirty',
       diagnostics: [{ severity: 'error', code: `${prefix}(${id})`, message }],
@@ -174,8 +190,8 @@ async function runSeeds(id: string): Promise<WhipReport> {
 }
 
 async function runOxlint(rule: RuleItem, fix: boolean): Promise<WhipReport> {
-  writePunishConfig(rule);
-  const files = listPluginTs(arthouseDir).map(rel => join('src/arthouse', rel));
+  await writePunishConfig(rule);
+  const files = (await listPluginTs(arthouseDir)).map(rel => path.join('src/arthouse', rel));
   if (files.length === 0) {
     return { kind: 'crash', diagnostics: [], stderr: 'arthouse has no plugin files' };
   }
@@ -216,6 +232,7 @@ async function runOxlint(rule: RuleItem, fix: boolean): Promise<WhipReport> {
   if (diagnostics.length === 0) {
     return { kind: 'clean', diagnostics, stderr: result.stderr };
   }
+
   return { kind: 'dirty', diagnostics, stderr: result.stderr };
 }
 
@@ -240,6 +257,7 @@ async function runTsc(tsconfigPath: string): Promise<WhipReport> {
       stderr: result.stderr || result.stdout,
     };
   }
+
   return { kind: 'dirty', diagnostics, stderr: result.stderr || result.stdout };
 }
 
@@ -276,6 +294,7 @@ export async function whip(rule: RuleItem, label: string, pluginEntry: string): 
   const fixed = await runOxlint(rule, true);
   spinner.stop();
   log(`  ${found.diagnostics.length} hits · --fix ${fixed.kind} · ${fixed.diagnostics.length} leftover`);
+
   return fixed;
 }
 
@@ -327,16 +346,21 @@ export function printBlocker(
   process.stderr.write(`${lines.join('\n')}\n\n`);
 }
 
-export function waitForHands(paths: string[]) {
-  const targets = paths.filter(existsSync);
-  if (targets.length === 0 && existsSync(arthouseDir)) {
+export async function waitForHands(paths: string[]) {
+  const targets: string[] = [];
+  for (const filePath of paths) {
+    if (await exists(filePath)) {
+      targets.push(filePath);
+    }
+  }
+  if (targets.length === 0 && await exists(arthouseDir)) {
     targets.push(arthouseDir);
   }
 
   return new Promise<void>((resolve) => {
     let armed = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const watchers: Array<ReturnType<typeof watch>> = [];
+    const watchers: Array<ReturnType<typeof fs.watch>> = [];
     const arm = setTimeout(() => {
       armed = true;
     }, 800);
@@ -361,7 +385,7 @@ export function waitForHands(paths: string[]) {
     };
 
     for (const target of targets) {
-      watchers.push(watch(target, { recursive: true }, (_event, filename) => {
+      watchers.push(fs.watch(target, { recursive: true }, (_event, filename) => {
         onChange(filename);
       }));
     }
@@ -376,22 +400,23 @@ export function waitUntilSigint() {
 export async function blockUntilTypesGreen(kind: 'origin' | 'arthouse') {
   while (true) {
     if (kind === 'arthouse') {
-      if (!existsSync(join(arthouseDir, 'index.ts'))) {
+      if (!(await exists(path.join(arthouseDir, 'index.ts')))) {
         return;
       }
-      writeArthouseTsconfig();
+      await writeArthouseTsconfig();
     }
     spinner.start(`punish  tsc ${kind}`);
     const tsconfig = kind === 'origin'
-      ? join(root, 'tsconfig.json')
-      : join(arthouseDir, 'tsconfig.json');
+      ? path.join(root, 'tsconfig.json')
+      : path.join(arthouseDir, 'tsconfig.json');
     const report = await runTsc(tsconfig);
     spinner.stop();
     if (report.kind === 'clean') {
       log('  tsc clean');
       if (kind === 'arthouse') {
-        snapshot();
+        await snapshot();
       }
+
       return;
     }
     if (report.kind === 'crash') {
@@ -404,7 +429,7 @@ export async function blockUntilTypesGreen(kind: 'origin' | 'arthouse') {
       process.exit(1);
     }
     const hitAbs = report.diagnostics[0]?.filename
-      ? join(root, report.diagnostics[0].filename)
+      ? path.join(root, report.diagnostics[0].filename)
       : kind === 'origin'
         ? originDir
         : arthouseDir;

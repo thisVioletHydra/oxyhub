@@ -71,6 +71,7 @@ Add the plugin, then turn on rules under `oxyhub/*`.
     "oxyhub/no-floating-promise": "error",
     "oxyhub/no-node-named-import": "error",
     "oxyhub/padding-line-before-decorator": "error",
+    "oxyhub/padding-line-before-return": "error",
     "oxyhub/prefer-fs-promises": "error",
     "oxyhub/prefer-node-default-name": "error",
     "oxyhub/prefer-object-arrow-method": "error",
@@ -79,9 +80,9 @@ Add the plugin, then turn on rules under `oxyhub/*`.
 }
 ```
 
-## Rules (20)
+## Rules (21)
 
-### Layout (13)
+### Layout (14)
 
 | Rule | Description |
 | --- | --- |
@@ -97,6 +98,7 @@ Add the plugin, then turn on rules under `oxyhub/*`.
 | `no-blank-lines-in-arrow-expression` | No blank line between `=>` and an expression body. |
 | `no-blank-lines-in-chain` | No blank lines inside a member call chain. |
 | `padding-line-before-decorator` | Blank line before a decorator, unless stacked on another decorator. |
+| `padding-line-before-return` | Blank line before `return` when the function has more than one return. |
 | `prefer-object-arrow-method` | Object methods as `key: (args) => {}`, not `key() {}`. |
 
 ### Node.js (4)
@@ -112,7 +114,7 @@ Add the plugin, then turn on rules under `oxyhub/*`.
 
 | Rule | Description |
 | --- | --- |
-| `no-bang-condition` | `!` only on real booleans. No truthiness coercion in `if` tests. |
+| `no-bang-condition` | `!` only on real booleans. Token getters fix to `=== null`; anything else to a full nullish check. |
 | `no-floating-promise` | Floating promise chains need `.catch`, `void`, `await`, or `return`. |
 | `id-length` | Minimum identifier length. `let` / `const` bindings are ignored. |
 

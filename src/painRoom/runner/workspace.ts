@@ -1,13 +1,4 @@
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import type { FileKind, RuleItem } from './types.ts';
 
 import { log } from './log.ts';
 import {
@@ -23,53 +14,66 @@ import {
   snapDir,
   statePath,
 } from './paths.ts';
-import type { FileKind, RuleItem } from './types.ts';
 
-function writeFileDeep(path: string, contents: string) {
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, contents);
-}
+import fsPromises from 'node:fs/promises';
+import path from 'node:path';
 
-function writeJson(path: string, value: unknown) {
-  writeFileDeep(path, `${JSON.stringify(value, null, 2)}\n`);
-}
+async function exists(filePath: string) {
+  try {
+    await fsPromises.access(filePath);
 
-function emptyDir(dir: string) {
-  if (existsSync(dir)) {
-    rmSync(dir, { recursive: true, force: true });
+    return true;
   }
-  mkdirSync(dir, { recursive: true });
+  catch {
+    return false;
+  }
 }
 
-function listTsFiles(dir: string, base = dir): string[] {
-  if (!existsSync(dir)) {
+async function writeFileDeep(filePath: string, contents: string | Buffer) {
+  await fsPromises.mkdir(path.dirname(filePath), { recursive: true });
+  await fsPromises.writeFile(filePath, contents);
+}
+
+async function writeJson(filePath: string, value: unknown) {
+  await writeFileDeep(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+async function emptyDir(dir: string) {
+  await fsPromises.rm(dir, { recursive: true, force: true });
+  await fsPromises.mkdir(dir, { recursive: true });
+}
+
+async function listTsFiles(dir: string, base = dir): Promise<string[]> {
+  if (!(await exists(dir))) {
     return [];
   }
   const out: string[] = [];
-  for (const name of readdirSync(dir)) {
-    const full = join(dir, name);
-    if (statSync(full).isDirectory()) {
-      out.push(...listTsFiles(full, base));
+  const entries = await fsPromises.readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...await listTsFiles(full, base));
       continue;
     }
-    if (name.endsWith('.ts')) {
-      out.push(relative(base, full));
+    if (entry.name.endsWith('.ts')) {
+      out.push(path.relative(base, full));
     }
   }
+
   return out;
 }
 
-export function listPluginTs(dir: string) {
+export async function listPluginTs(dir: string) {
   const out: string[] = [];
   for (const name of ['index.ts', 'plugin-types.ts']) {
-    if (existsSync(join(dir, name))) {
+    if (await exists(path.join(dir, name))) {
       out.push(name);
     }
   }
   for (const folder of ['rules', 'utils']) {
-    const full = join(dir, folder);
-    if (existsSync(full)) {
-      out.push(...listTsFiles(full, dir));
+    const full = path.join(dir, folder);
+    if (await exists(full)) {
+      out.push(...await listTsFiles(full, dir));
     }
   }
   return out;
@@ -85,6 +89,7 @@ function fileKind(rel: string): FileKind {
   if (rel.startsWith('utils/') || rel.startsWith('utils\\')) {
     return 'util';
   }
+
   return 'other';
 }
 
@@ -134,95 +139,101 @@ function rewriteRelativeToHash(source: string, kind: FileKind) {
   return applyRewrites(source, toHash[kind]);
 }
 
-function copyPluginTree(
+async function copyPluginTree(
   fromDir: string,
   toDir: string,
   rewrite: (source: string, kind: FileKind) => string,
 ) {
-  mkdirSync(toDir, { recursive: true });
-  for (const rel of listPluginTs(fromDir)) {
-    const source = readFileSync(join(fromDir, rel), 'utf8');
-    writeFileDeep(join(toDir, rel), rewrite(source, fileKind(rel)));
+  await fsPromises.mkdir(toDir, { recursive: true });
+  for (const rel of await listPluginTs(fromDir)) {
+    const source = await fsPromises.readFile(path.join(fromDir, rel), 'utf8');
+    await writeFileDeep(path.join(toDir, rel), rewrite(source, fileKind(rel)));
   }
 }
 
-export function wipeArthouse() {
-  if (existsSync(arthouseDir)) {
-    rmSync(arthouseDir, { recursive: true, force: true });
+export async function wipeArthouse() {
+  await fsPromises.rm(arthouseDir, { recursive: true, force: true });
+}
+
+export async function wipeCache() {
+  await fsPromises.rm(cachePath, { force: true });
+}
+
+async function painRoomRuleDirs() {
+  const entries = await fsPromises.readdir(painRoomDir, { withFileTypes: true });
+  const ids: string[] = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    if (await exists(path.join(painRoomDir, entry.name, 'dirty.ts'))) {
+      ids.push(entry.name);
+    }
   }
+  return ids;
 }
 
-export function wipeCache() {
-  if (existsSync(cachePath)) {
-    rmSync(cachePath);
-  }
-}
-
-function painRoomRuleDirs() {
-  return readdirSync(painRoomDir).filter((name) => {
-    const full = join(painRoomDir, name);
-    return statSync(full).isDirectory() && existsSync(join(full, 'dirty.ts'));
-  });
-}
-
-export function copySeeds() {
-  emptyDir(seedsDir);
-  for (const id of painRoomRuleDirs()) {
-    const from = join(painRoomDir, id);
-    const to = join(seedsDir, id);
-    mkdirSync(to, { recursive: true });
+export async function copySeeds() {
+  await emptyDir(seedsDir);
+  for (const id of await painRoomRuleDirs()) {
+    const from = path.join(painRoomDir, id);
+    const to = path.join(seedsDir, id);
+    await fsPromises.mkdir(to, { recursive: true });
     for (const name of ['dirty.ts', 'whip.ts', 'gag.ts']) {
-      const src = join(from, name);
-      if (existsSync(src)) {
-        writeFileSync(join(to, name), readFileSync(src));
+      const src = path.join(from, name);
+      if (await exists(src)) {
+        await fsPromises.copyFile(src, path.join(to, name));
       }
     }
   }
 }
 
-export function snapshot() {
-  emptyDir(snapDir);
-  copyPluginTree(arthouseDir, snapDir, source => source);
-  writeFileSync(join(snapDir, '.ok'), `${Date.now()}\n`);
+export async function snapshot() {
+  await emptyDir(snapDir);
+  await copyPluginTree(arthouseDir, snapDir, source => source);
+  await fsPromises.writeFile(path.join(snapDir, '.ok'), `${Date.now()}\n`);
 }
 
-export function restoreSnap() {
-  copyPluginTree(snapDir, arthouseDir, source => source);
-  copySeeds();
+export async function restoreSnap() {
+  await copyPluginTree(snapDir, arthouseDir, source => source);
+  await copySeeds();
 }
 
-export function copyOriginToArthouse() {
-  emptyDir(arthouseDir);
-  copyPluginTree(originDir, arthouseDir, rewriteHashToRelative);
-  copySeeds();
+export async function copyOriginToArthouse() {
+  await emptyDir(arthouseDir);
+  await copyPluginTree(originDir, arthouseDir, rewriteHashToRelative);
+  await copySeeds();
 }
 
-export function promoteArthouseToOrigin() {
-  copyPluginTree(arthouseDir, originDir, rewriteRelativeToHash);
+export async function promoteArthouseToOrigin() {
+  await copyPluginTree(arthouseDir, originDir, rewriteRelativeToHash);
 }
 
-export function readState() {
-  if (!existsSync(statePath)) {
+export async function readState() {
+  if (!(await exists(statePath))) {
     return null;
   }
   try {
-    return JSON.parse(readFileSync(statePath, 'utf8')) as { index: number; ruleId: string };
+    return JSON.parse(await fsPromises.readFile(statePath, 'utf8')) as {
+      index: number;
+      ruleId: string;
+    };
   }
   catch {
     return null;
   }
 }
 
-export function writeState(index: number, ruleId: string) {
-  writeJson(statePath, {
+export async function writeState(index: number, ruleId: string) {
+  await writeJson(statePath, {
     index,
     ruleId,
     updatedAt: new Date().toISOString(),
   });
 }
 
-export function writeArthouseTsconfig() {
-  writeJson(join(arthouseDir, 'tsconfig.json'), {
+export async function writeArthouseTsconfig() {
+  await writeJson(path.join(arthouseDir, 'tsconfig.json'), {
     extends: '../../tsconfig.json',
     compilerOptions: {
       noEmit: true,
@@ -232,9 +243,9 @@ export function writeArthouseTsconfig() {
   });
 }
 
-export function writePunishConfig(rule: RuleItem) {
+export async function writePunishConfig(rule: RuleItem) {
   const key = `${prefix}/${rule.id}`;
-  writeJson(configPath, {
+  await writeJson(configPath, {
     plugins: [],
     jsPlugins: ['./dist/index.mjs'],
     ignorePatterns: ['**/seeds/**', '**/snap/**', '**/dist/**'],
@@ -244,18 +255,19 @@ export function writePunishConfig(rule: RuleItem) {
   });
 }
 
-export function listRules(): RuleItem[] {
-  const oxlintConfig = JSON.parse(readFileSync(join(root, '.oxlintrc.json'), 'utf8')) as {
+export async function listRules(): Promise<RuleItem[]> {
+  const oxlintConfig = JSON.parse(await fsPromises.readFile(path.join(root, '.oxlintrc.json'), 'utf8')) as {
     rules?: Record<string, unknown>;
   };
-  const seeded = new Set(painRoomRuleDirs());
-  const rulesDir = join(originDir, 'rules');
-  const fromFiles = new Set(
-    readdirSync(rulesDir).filter((name) => {
-      const full = join(rulesDir, name);
-      return statSync(full).isDirectory() && existsSync(join(full, 'index.ts'));
-    }),
-  );
+  const seeded = new Set(await painRoomRuleDirs());
+  const rulesDir = path.join(originDir, 'rules');
+  const fromFiles = new Set<string>();
+  const entries = await fsPromises.readdir(rulesDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isDirectory() && await exists(path.join(rulesDir, entry.name, 'index.ts'))) {
+      fromFiles.add(entry.name);
+    }
+  }
   const rules: RuleItem[] = [];
   const seen = new Set<string>();
 
@@ -287,30 +299,31 @@ export function listRules(): RuleItem[] {
   return rules;
 }
 
-export function includeInProgress(queue: RuleItem[], all: RuleItem[]) {
+export async function includeInProgress(queue: RuleItem[], all: RuleItem[]) {
   if (fresh) {
     return queue;
   }
-  const state = readState();
-  if (!existsSync(join(snapDir, '.ok')) || !state?.ruleId) {
+  const state = await readState();
+  if (!(await exists(path.join(snapDir, '.ok'))) || state?.ruleId === undefined) {
     return queue;
   }
   if (queue.some(rule => rule.id === state.ruleId)) {
     return queue;
   }
   const current = all.find(rule => rule.id === state.ruleId);
-  if (!current) {
+  if (current === null || current === undefined) {
     return queue;
   }
+
   return [current, ...queue];
 }
 
-export function prepareWorkspace(queue: RuleItem[]) {
-  const snapOk = existsSync(join(snapDir, '.ok'));
-  const state = readState();
+export async function prepareWorkspace(queue: RuleItem[]) {
+  const snapOk = await exists(path.join(snapDir, '.ok'));
+  const state = await readState();
 
-  if (!fresh && snapOk && state) {
-    restoreSnap();
+  if (!fresh && snapOk && state !== null && state !== undefined) {
+    await restoreSnap();
     let index = queue.findIndex(rule => rule.id === state.ruleId);
     if (index < 0) {
       index = 0;
@@ -318,17 +331,20 @@ export function prepareWorkspace(queue: RuleItem[]) {
     const current = queue[index];
     const where = queue.length === 0
       ? 'done'
-      : `${index + 1}/${queue.length}${current ? `  ${prefix}/${current.id}` : ''}`;
+      : `${index + 1}/${queue.length}${current === undefined ? '' : `  ${prefix}/${current.id}`}`;
     log(`resume · ${where}`);
+
     return { index, mode: 'resume' as const };
   }
 
   if (queue.length === 0) {
     log('cache hit · all rules fresh');
+
     return { index: 0, mode: 'skip' as const };
   }
 
-  copyOriginToArthouse();
-  snapshot();
+  await copyOriginToArthouse();
+  await snapshot();
+
   return { index: 0, mode: 'fresh' as const };
 }

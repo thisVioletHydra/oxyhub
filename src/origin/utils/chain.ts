@@ -63,6 +63,7 @@ export function collectChainExpressions(node: LintNode): LintNode[] {
         root
       );
     }
+
     return expressions;
   }
 
@@ -75,6 +76,7 @@ export function collectChainExpressions(node: LintNode): LintNode[] {
         root
       );
     }
+
     return expressions;
   }
 
@@ -87,6 +89,7 @@ export function collectChainExpressions(node: LintNode): LintNode[] {
         root
       );
     }
+
     return expressions;
   }
 

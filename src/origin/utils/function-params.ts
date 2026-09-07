@@ -28,16 +28,39 @@ export function getLineIndent(
 }
 
 /**
- * Parameter-list `(` / `)` only — not the `)` inside a return type like `: () => void`.
+ * Parameter-list `(` / `)` only.
+ * Unparenthesized arrows (`rule => …`) have no list — do not steal `(` from
+ * `.map(` or from a call in the arrow body.
  */
 export function getFunctionParameterParens(
   sourceCode: SourceCode,
   node: FunctionNode
 ) {
-  const leftParen = sourceCode.getFirstToken(
-    node,
-    isOpeningParenToken
-  );
+  let leftParen: Token | null;
+
+  if (node.type === 'ArrowFunctionExpression') {
+    let head = sourceCode.getFirstToken(
+      node
+    );
+    if (head?.value === 'async') {
+      head = sourceCode.getTokenAfter(
+        head
+      );
+    }
+    if (!head || !isOpeningParenToken(
+      head
+    )) {
+      return null;
+    }
+    leftParen = head;
+  }
+  else {
+    leftParen = sourceCode.getFirstToken(
+      node,
+      isOpeningParenToken
+    );
+  }
+
   if (leftParen === null || leftParen === undefined) {
     return null;
   }

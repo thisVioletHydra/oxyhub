@@ -3,7 +3,9 @@
   "ignorePatterns": [
     "dist/**",
     "node_modules/**",
-    "src/painRoom/**",
+    "src/painRoom/**/dirty.ts",
+    "src/painRoom/**/whip.ts",
+    "src/painRoom/**/gag.ts",
     "src/arthouse/dist/**",
     "src/arthouse/snap/**",
     "src/arthouse/seeds/**"
@@ -59,6 +61,7 @@
     "oxyhub/no-floating-promise": "error",
     "oxyhub/no-node-named-import": "error",
     "oxyhub/padding-line-before-decorator": "error",
+    "oxyhub/padding-line-before-return": "error",
     "oxyhub/prefer-fs-promises": "error",
     "oxyhub/prefer-node-default-name": "error",
     "oxyhub/prefer-object-arrow-method": "off",

@@ -38,8 +38,8 @@
   "scripts": {
     "build": "tsdown",
     "prepublishOnly": "pnpm build",
-    "lint": "pnpm build && oxlint src/origin",
-    "lint:fix": "pnpm build && oxlint --fix src/origin",
+    "lint": "pnpm build && oxlint src/origin src/painRoom",
+    "lint:fix": "pnpm build && oxlint --fix src/origin src/painRoom",
     "test": "vitest run",
     "punish": "node src/painRoom/punish.ts",
     "punish:once": "node src/painRoom/punish.ts --once",
