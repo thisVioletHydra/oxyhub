@@ -3,6 +3,11 @@ export function single() {
   return value;
 }
 
+export function singleThrow() {
+  const reason = 'no';
+  throw new Error(reason);
+}
+
 export function early(flag: boolean) {
   if (flag) {
     return 1;

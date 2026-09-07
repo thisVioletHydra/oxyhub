@@ -1,81 +1,24 @@
 import type { LintNode, RuleModule } from '#plugin-types';
 
+import {
+  type IdLengthOptions,
+  checkBindingPattern,
+  isInsideLetOrConstBinding,
+  isLetOrConstDeclarator,
+  isTooShort,
+} from './pattern.ts';
+
 const DEFAULT_MIN = 2;
 const DEFAULT_EXCEPTIONS: string[] = [];
 const DEFAULT_EXCEPTION_PATTERNS: string[] = [];
 
-type IdLengthOptions = {
-  min: number;
-  exceptions: Set<string>;
-  exceptionPatterns: RegExp[];
-  properties: 'always' | 'never';
-};
-
-function isTooShort(
-  name: string,
-  options: IdLengthOptions
-) {
-  if (name.length >= options.min) {
-    return false;
-  }
-
-  if (options.exceptions.has(
-    name
-  )) {
-    return false;
-  }
-
-  return !options.exceptionPatterns.some(
-    (pattern) => pattern.test(
-      name
-    )
-  );
-}
-
-function isLetOrConstDeclarator(node: LintNode | null | undefined) {
-  return (
-    node?.type === 'VariableDeclarator'
-    && ((node.parent as { kind?: string } | undefined)?.kind === 'let'
-      || (node.parent as { kind?: string } | undefined)?.kind === 'const')
-  );
-}
-
-function isInsideLetOrConstBinding(node: LintNode) {
-  let current = node.parent;
-
-  while (current) {
-    if (isLetOrConstDeclarator(
-      current
-    )) {
-      return true;
-    }
-
-    if (
-      current.type === 'FunctionDeclaration'
-      || current.type === 'FunctionExpression'
-      || current.type === 'ArrowFunctionExpression'
-      || current.type === 'ClassDeclaration'
-      || current.type === 'ClassExpression'
-      || current.type === 'CatchClause'
-      || current.type === 'ImportDeclaration'
-      || current.type === 'ExportNamedDeclaration'
-      || current.type === 'Program'
-    ) {
-      return false;
-    }
-
-    current = current.parent;
-  }
-
-  return false;
-}
-
 const rule: RuleModule = {
   meta: {
     type: 'suggestion',
+    deprecated: true,
     docs: {
       description:
-        'Enforce minimum identifier length, ignoring let/const bindings.',
+        'Enforce minimum identifier length, ignoring let/const bindings. Use prefer-descriptive-binding.',
     },
     messages: {
       tooShort: 'Identifier name is too short (< {{min}}).',
@@ -150,68 +93,17 @@ const rule: RuleModule = {
       );
     }
 
-    function checkBindingPattern(pattern: LintNode) {
-      if (pattern.type === 'Identifier') {
-        reportIfTooShort(
-          pattern
-        );
-        return;
-      }
-
-      if (pattern.type === 'ArrayPattern') {
-        for (const element of pattern.elements) {
-          if (element) {
-            checkBindingPattern(
-              element
-            );
-          }
-        }
-        return;
-      }
-
-      if (pattern.type === 'ObjectPattern') {
-        for (const property of pattern.properties) {
-          if (property.type === 'RestElement') {
-            checkBindingPattern(
-              property.argument
-            );
-            continue;
-          }
-
-          if (property.value) {
-            checkBindingPattern(
-              property.value
-            );
-          }
-        }
-        return;
-      }
-
-      if (pattern.type === 'AssignmentPattern') {
-        checkBindingPattern(
-          pattern.left
-        );
-        return;
-      }
-
-      if (pattern.type === 'RestElement') {
-        checkBindingPattern(
-          pattern.argument
-        );
-      }
-    }
-
     return {
       VariableDeclarator(node) {
-        if (
-          (node.parent as { kind?: string } | undefined)?.kind === 'let'
-          || (node.parent as { kind?: string } | undefined)?.kind === 'const'
-        ) {
+        if (isLetOrConstDeclarator(
+          node
+        )) {
           return;
         }
 
         checkBindingPattern(
-          node.id
+          node.id,
+          reportIfTooShort
         );
       },
       FunctionDeclaration(node) {
@@ -223,7 +115,8 @@ const rule: RuleModule = {
 
         for (const param of node.params) {
           checkBindingPattern(
-            param
+            param,
+            reportIfTooShort
           );
         }
       },
@@ -236,14 +129,16 @@ const rule: RuleModule = {
 
         for (const param of node.params) {
           checkBindingPattern(
-            param
+            param,
+            reportIfTooShort
           );
         }
       },
       ArrowFunctionExpression(node) {
         for (const param of node.params) {
           checkBindingPattern(
-            param
+            param,
+            reportIfTooShort
           );
         }
       },
@@ -264,7 +159,8 @@ const rule: RuleModule = {
       CatchClause(node) {
         if (node.param) {
           checkBindingPattern(
-            node.param
+            node.param,
+            reportIfTooShort
           );
         }
       },

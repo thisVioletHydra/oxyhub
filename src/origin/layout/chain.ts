@@ -170,7 +170,7 @@ export function getArrowToken(sourceCode: SourceCode, node: ArrowFunctionExpress
   const bodyStart = sourceCode.getFirstToken(
     node.body
   );
-  if (bodyStart === null || bodyStart === undefined) {
+  if (bodyStart === null) {
     return null;
   }
 

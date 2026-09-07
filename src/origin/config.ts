@@ -2,15 +2,6 @@ import plugin from './index.ts';
 
 const prefix = plugin.meta.name;
 
-const RULE_OPTIONS: Record<string, object> = {
-  'id-length': {
-    min: 2,
-    exceptions: ['i', 'j', 'f', '_', 't'],
-    exceptionPatterns: ['^[A-Z]$'],
-    properties: 'never',
-  },
-};
-
 function isPaddingRule(id: string) {
   return id.startsWith('padding-line-');
 }
@@ -19,9 +10,13 @@ function oxyhubRules() {
   const rules: Record<string, unknown> = {};
 
   for (const id of Object.keys(plugin.rules)) {
+    if (id === 'id-length') {
+      rules[`${prefix}/${id}`] = 'off';
+      continue;
+    }
+
     const severity = isPaddingRule(id) ? 'warn' : 'error';
-    const options = RULE_OPTIONS[id];
-    rules[`${prefix}/${id}`] = options === undefined ? severity : [severity, options];
+    rules[`${prefix}/${id}`] = severity;
   }
 
   return rules;
@@ -45,6 +40,7 @@ const recommended = {
     ],
     'typescript/no-floating-promises': 'off',
     'unicorn/prefer-node-protocol': 'error',
+    'max-lines': ['error', { max: 300 }],
     ...oxyhubRules(),
   },
 };

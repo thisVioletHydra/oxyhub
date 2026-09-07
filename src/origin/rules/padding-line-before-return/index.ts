@@ -1,65 +1,68 @@
 import type { FunctionNode, LintNode, RuleFixer, RuleModule } from '#plugin-types';
 
-import { hasBlankLine } from '#layout/chain';
-import { enclosingFunction, previousStatement } from '#layout/statements';
+import { blankLineInsert, enclosingFunction, isExitStatement, previousStatement } from '#layout/statements';
+
+function collectExit(exitsByFunction: Map<FunctionNode, LintNode[]>, node: LintNode) {
+  if (!isExitStatement(node)) {
+    return;
+  }
+
+  const fn = enclosingFunction(node);
+  if (fn === null) {
+    return;
+  }
+
+  const list = exitsByFunction.get(fn) ?? [];
+  list.push(node);
+  exitsByFunction.set(fn, list);
+}
 
 const rule: RuleModule = {
   meta: {
     type: 'layout',
     docs: {
-      description: 'Require a blank line before return when the function has more than one return.',
+      description:
+        'Require a blank line before return or throw when the function has more than one of them.',
     },
     fixable: 'whitespace',
     messages: {
-      missingBlankLine: 'Expected blank line before this return.',
+      missingBlankLine: 'Expected blank line before this return or throw.',
     },
     schema: [],
   },
   create(context) {
     const sourceCode = context.sourceCode;
-    const returnsByFunction = new Map<FunctionNode, LintNode[]>();
+    const exitsByFunction = new Map<FunctionNode, LintNode[]>();
 
     return {
       ReturnStatement(node: LintNode) {
-        const fn = enclosingFunction(node);
-        if (fn === null) {
-          return;
-        }
-        const list = returnsByFunction.get(fn) ?? [];
-        list.push(node);
-        returnsByFunction.set(fn, list);
+        collectExit(exitsByFunction, node);
+      },
+      ThrowStatement(node: LintNode) {
+        collectExit(exitsByFunction, node);
       },
       'Program:exit'() {
-        for (const returns of returnsByFunction.values()) {
-          if (returns.length < 2) {
+        for (const exits of exitsByFunction.values()) {
+          if (exits.length < 2) {
             continue;
           }
-          for (const stmt of returns) {
+
+          for (const stmt of exits) {
             const previous = previousStatement(stmt);
-            const prevRange = previous?.range;
-            const stmtRange = stmt.range;
-            if (
-              previous === null
-              || prevRange === null
-              || prevRange === undefined
-              || stmtRange === null
-              || stmtRange === undefined
-            ) {
+            if (previous === null) {
               continue;
             }
-            const gap = sourceCode.text.slice(prevRange[1], stmtRange[0]);
-            if (hasBlankLine(gap)) {
+
+            const insert = blankLineInsert(sourceCode.text, previous, stmt);
+            if (insert === null) {
               continue;
             }
-            const sameLine = previous.loc!.end.line === stmt.loc!.start.line;
+
             context.report({
               node: stmt,
               messageId: 'missingBlankLine',
               fix(fixer: RuleFixer) {
-                return fixer.insertTextAfterRange(
-                  prevRange,
-                  sameLine ? '\n\n' : '\n',
-                );
+                return fixer.insertTextAfterRange(insert.prevRange, insert.text);
               },
             });
           }

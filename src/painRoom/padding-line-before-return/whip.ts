@@ -6,3 +6,21 @@ export function many(flag: boolean) {
 
   return fallback;
 }
+
+export function twoThrows(flag: boolean) {
+  if (flag) {
+    throw new Error('yes');
+  }
+  const reason = 'no';
+
+  throw new Error(reason);
+}
+
+export function throwThenReturn(flag: boolean) {
+  if (flag) {
+    throw new Error('no');
+  }
+  const value = 1;
+
+  return value;
+}

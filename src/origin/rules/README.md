@@ -22,30 +22,30 @@
 
 | Rule | What | Options |
 | --- | --- | --- |
-| `id-length` | Minimum identifier length. `let` / `const` bindings ignored. | `min`, `exceptions`, `exceptionPatterns`, `properties` |
+| `prefer-descriptive-binding` | Opaque params/loops (`e`, `err`, `el`, `i`). Bindings must not steal builtins (`filter`, `object`, `prototype`, `constructor`, `require`). `.map((f) =>` stays. | — |
 | `prefer-object-arrow-method` | Object methods as `key: (args) => {}`, not `key() {}`. Off in dogfood. | — |
 | `prefer-process-import` | `import process from "node:process"` instead of the global. | — |
 | `prefer-fs-promises` | Prefer `fsPromises` over blocking `fs` sync methods. | — |
 | `prefer-node-default-name` | Conventional default import names (`process`, `path`, `fs`, `fsPromises`). | — |
 | `no-node-named-import` | No named value imports from `node:` builtins. | — |
+| `no-overloaded-if` | At most 3 checks in an `if`. Four or more: extract a named predicate. | — |
 
-### `id-length`
+### `prefer-descriptive-binding`
 
-```json
-{
-  "min": 2,
-  "exceptions": ["i", "j", "f", "_", "t"],
-  "exceptionPatterns": ["^[A-Z]$"],
-  "properties": "never"
-}
-```
+Opaque names only on params, `catch`, `for` / `for-in` / `for-of`. `_` and `.map((f) => f.name)` are allowed.
 
-| Option | Default | Meaning |
-| --- | --- | --- |
-| `min` | `2` | Minimum name length. |
-| `exceptions` | `[]` | Exact names to allow. |
-| `exceptionPatterns` | `[]` | Regex strings to allow. |
-| `properties` | `"always"` | `"never"` skips object keys. |
+| Name | Catch | Listener / param | Iterate / `for-of` | `for (;;)` |
+| --- | --- | --- | --- | --- |
+| `e` | `error` | `event` | `item` | — |
+| `err` / `er` | `error` | `error` | `error` | `error` |
+| `el` | `element` | `element` | `element` | `element` |
+| `i` | `index` | `index` | `item` | `index` |
+
+Any binding (including `let` / `const` / function id): dummy types (`obj`, `object`, `arr`, `array`) and builtins (`filter`, `Object`, `undefined`, `eval`, `prototype`, `constructor`, `require`, …). Not property keys, not imports. `map` / `set` / `get` are left alone. Keywords like `const const = 1` are already a syntax error (`default` is still banned if it shows up as a binding).
+
+`id-length` is still in the plugin, **off** in recommended.
+
+Recommended also enables oxlint `max-lines` at 300. Core rule, not `oxyhub/*`.
 
 ## Layout
 
@@ -65,5 +65,5 @@
 | `no-blank-lines-in-arrow-expression` | No blank line between `=>` and an expression body. |
 | `no-blank-lines-in-chain` | No blank lines inside a member call chain. |
 | `padding-line-before-decorator` | Blank line before a decorator, unless stacked on another decorator. |
-| `padding-line-before-for` | Blank line before `for` / `for-in` / `for-of` unless it is the first statement in the block. |
-| `padding-line-before-return` | Blank line before `return` when the function has more than one return. |
+| `padding-line-before-return` | Blank line before `return` / `throw` when the function has more than one of them. |
+| `padding-line-between-statements` | Blank line after `if` / `for` / `try` / `switch` when another statement follows. Not before them after bindings. |

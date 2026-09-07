@@ -14,6 +14,8 @@ Oxlint JS plugin. One layout, TS conventions (`node:` imports included), no slop
 - Highlight messy indent, calls, chains, objects, params, ternaries, and imports
 - Force `node:` defaults (`process`, `fsPromises`) instead of globals and sync `fs`
 - Ban `!` truthiness in `if` tests and unhandled promise chains
+- Ban opaque params (`e`, `err`, `el`, `i`) and bindings that steal builtins (`filter`, `object`)
+- Cap files at 300 lines (`max-lines`)
 - Autofix where the rule can rewrite the file
 
 ```ts
@@ -75,7 +77,7 @@ export default defineConfig({
 
 JSON still works: `"extends": ["./node_modules/@oxyhub/oxlint-plugin/recommended.json"]`. One config file per directory — JSON or TS, not both.
 
-## Rules (22)
+## Rules (23)
 
 ### Problem (2)
 
@@ -86,18 +88,19 @@ Bugs. Default: `error`.
 | `no-bang-condition` | `!` only on real booleans. Token getters fix to `=== null`; anything else to a full nullish check. |
 | `no-floating-promise` | Floating promise chains need `.catch`, `void`, `await`, or `return`. |
 
-### Convention (6)
+### Convention (7)
 
 How to write TypeScript. Default: `error`.
 
 | Rule | Description |
 | --- | --- |
-| `id-length` | Minimum identifier length. `let` / `const` bindings are ignored. |
+| `prefer-descriptive-binding` | No `e`/`err`/`el`/`i` in params, catch, loops. No bindings named after builtins (`filter`, `object`, `prototype`, `constructor`, `require`). `f` in `.map((f) =>` is fine. |
 | `prefer-object-arrow-method` | Object methods as `key: (args) => {}`, not `key() {}`. |
 | `prefer-process-import` | Use `import process from "node:process"` instead of the global. |
 | `prefer-fs-promises` | Prefer `fsPromises` over blocking `fs` sync methods. |
 | `prefer-node-default-name` | Conventional default import names (`process`, `path`, `fs`, `fsPromises`). |
 | `no-node-named-import` | No named value imports from `node:` builtins. |
+| `no-overloaded-if` | At most 3 checks in an `if`. Four or more: extract a named predicate. |
 
 ### Layout (14)
 
@@ -117,19 +120,12 @@ Indent, wrapping, blank lines. `consistent-*` and blank-in-* default to `error`.
 | `no-blank-lines-in-arrow-expression` | No blank line between `=>` and an expression body. |
 | `no-blank-lines-in-chain` | No blank lines inside a member call chain. |
 | `padding-line-before-decorator` | Blank line before a decorator, unless stacked on another decorator. |
-| `padding-line-before-for` | Blank line before `for` / `for-in` / `for-of` unless it is the first statement in the block. |
-| `padding-line-before-return` | Blank line before `return` when the function has more than one return. |
+| `padding-line-before-return` | Blank line before `return` / `throw` when the function has more than one of them. |
+| `padding-line-between-statements` | Blank line after `if` / `for` / `try` / `switch` when another statement follows. Not before them after bindings. |
 
 ## Settings
 
-> Only `oxyhub/id-length` has options. Prefix every id with `oxyhub/`.
-
-| Setting | Default | Description |
-| --- | --- | --- |
-| `min` | `2` | Minimum identifier length. |
-| `exceptions` | `[]` | Exact names to allow. |
-| `exceptionPatterns` | `[]` | Regex strings to allow. |
-| `properties` | `"always"` | `"never"` skips object keys. |
+Recommended also turns on oxlint `max-lines` at **300**. That is core oxlint, not `oxyhub/*`.
 
 ## License
 

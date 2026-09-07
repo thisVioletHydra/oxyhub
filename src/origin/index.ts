@@ -15,9 +15,11 @@ import noBlankLinesInArrowExpression from '#rules/no-blank-lines-in-arrow-expres
 import noBlankLinesInChain from '#rules/no-blank-lines-in-chain';
 import noFloatingPromise from '#rules/no-floating-promise';
 import noNodeNamedImport from '#rules/no-node-named-import';
+import noOverloadedIf from '#rules/no-overloaded-if';
 import paddingLineBeforeDecorator from '#rules/padding-line-before-decorator';
-import paddingLineBeforeFor from '#rules/padding-line-before-for';
 import paddingLineBeforeReturn from '#rules/padding-line-before-return';
+import paddingLineBetweenStatements from '#rules/padding-line-between-statements';
+import preferDescriptiveBinding from '#rules/prefer-descriptive-binding';
 import preferFsPromises from '#rules/prefer-fs-promises';
 import preferNodeDefaultName from '#rules/prefer-node-default-name';
 import preferObjectArrowMethod from '#rules/prefer-object-arrow-method';
@@ -43,9 +45,11 @@ const plugin = {
     'no-blank-lines-in-chain': noBlankLinesInChain,
     'no-floating-promise': noFloatingPromise,
     'no-node-named-import': noNodeNamedImport,
+    'no-overloaded-if': noOverloadedIf,
     'padding-line-before-decorator': paddingLineBeforeDecorator,
-    'padding-line-before-for': paddingLineBeforeFor,
     'padding-line-before-return': paddingLineBeforeReturn,
+    'padding-line-between-statements': paddingLineBetweenStatements,
+    'prefer-descriptive-binding': preferDescriptiveBinding,
     'prefer-fs-promises': preferFsPromises,
     'prefer-node-default-name': preferNodeDefaultName,
     'prefer-object-arrow-method': preferObjectArrowMethod,

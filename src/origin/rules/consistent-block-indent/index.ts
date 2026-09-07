@@ -1,128 +1,19 @@
-import type { IfStatement, LintNode, RuleFixer, RuleModule, SourceCode, SwitchStatement, Token, WhileStatement } from '#plugin-types';
+import type { RuleModule } from '#plugin-types';
 
-type BlockMark =
-  | { type: 'program' }
-  | { type: 'block'; braceLine: number }
-  | { type: 'case'; caseLine: number };
+import { getLineIndent } from '#layout/tokens';
 
-type TextEdit = { start: number; end: number; text: string };
-
-type ConditionNode =
-  | IfStatement
-  | WhileStatement
-  | SwitchStatement;
-
-function getLineIndentFromLines(
-  lines: string[],
-  lineNumber: number
-) {
-  const line = lines[lineNumber - 1] ?? '';
-  const match = /^[\t ]*/.exec(
-    line
-  );
-  return match?.[0] ?? '';
-}
-
-function isTokenOnSameLine(
-  sourceCode: SourceCode,
-  left: Token,
-  right: Token
-) {
-  return left.loc.start.line === right.loc.start.line;
-}
-
-function markStatement(
-  sourceCode: SourceCode,
-  node: LintNode,
-  marks: Map<number, BlockMark>,
-  mark: BlockMark
-) {
-  const firstToken = sourceCode.getFirstToken(
-    node
-  );
-  if (firstToken === null || firstToken === undefined) {
-    return;
-  }
-
-  marks.set(
-    firstToken.loc.start.line,
-    mark
-  );
-}
-
-function collapseConditionSpacing(
-  sourceCode: SourceCode,
-  testNode: LintNode,
-  edits: TextEdit[]
-) {
-  const testFirst = sourceCode.getFirstToken(
-    testNode
-  );
-  const testLast = sourceCode.getLastToken(
-    testNode
-  );
-  if (!testFirst || !testLast) {
-    return;
-  }
-
-  const leftParen = sourceCode
-    .getTokenBefore(
-      testFirst,
-      (token: Token) => token.value === '(',
-  );
-  const rightParen = sourceCode.getTokenAfter(
-    testLast,
-    (token: Token) => token.value === ')',
-  );
-  const keywordToken = leftParen
-    ? sourceCode.getTokenBefore(
-      leftParen
-    )
-    : null;
-
-  if (!keywordToken || !leftParen || !rightParen) {
-    return;
-  }
-
-  if (!isTokenOnSameLine(
-    sourceCode,
-    leftParen,
-    rightParen
-  )) {
-    return;
-  }
-
-  const inner = sourceCode.text.slice(
-    leftParen.range[1],
-    rightParen.range[0]
-  );
-  if (/\n/.test(
-    inner
-  )) {
-    return;
-  }
-
-  const collapsed = inner.replace(
-    /\s+/g,
-    ' '
-  ).trim();
-  const expected = `${keywordToken.value} (${collapsed})`;
-  const actual = sourceCode.text.slice(
-    keywordToken.range[0],
-    rightParen.range[1]
-  );
-  if (actual === expected) {
-    return;
-  }
-
-  edits.push(
-    {
-      start: keywordToken.range[0],
-      end: rightParen.range[1],
-      text: expected,
-    }
-  );
-}
+import {
+  type BlockMark,
+  type CloseGap,
+  type TextEdit,
+  collectSameLineSplits,
+  markStatement,
+  visitBlock,
+} from './check.ts';
+import {
+  type ConditionNode,
+  applyBlockIndentFixes,
+} from './fix.ts';
 
 const rule: RuleModule = {
   meta: {
@@ -142,117 +33,7 @@ const rule: RuleModule = {
     const marks = new Map<number, BlockMark>();
     const edits: TextEdit[] = [];
     const conditionNodes: ConditionNode[] = [];
-    const closeGaps: Array<{ tokenBeforeEnd: number; closeStart: number; braceLine: number }> = [];
-
-    function bodyIndentForBlock(openBrace: Token) {
-      return `${getLineIndentFromLines(
-        sourceCode.lines,
-        openBrace.loc.start.line
-      )}  `;
-    }
-
-    function collectSameLineSplits(
-      body: Array<LintNode>,
-      statementIndent: string
-    ) {
-      for (let index = 1; index < body.length; index += 1) {
-        const previous = body[index - 1];
-        const current = body[index];
-        const previousEnd = sourceCode.getLastToken(
-          previous
-        );
-        const currentStart = sourceCode.getFirstToken(
-          current
-        );
-
-        if (!previousEnd || !currentStart) {
-          continue;
-        }
-
-        if (previousEnd.loc.end.line !== currentStart.loc.start.line) {
-          continue;
-        }
-
-        edits.push(
-          {
-            start: previousEnd.range[1],
-            end: currentStart.range[0],
-            text: `\n${statementIndent}`,
-          }
-        );
-      }
-    }
-
-    function visitBlock(node: LintNode) {
-      const openBrace = sourceCode.getFirstToken(
-        node
-      );
-      const closeBrace = sourceCode.getLastToken(
-        node
-      );
-      if (!openBrace || openBrace.value !== '{' || !closeBrace) {
-        return;
-      }
-
-      const mark = {
-        type: 'block' as const,
-        braceLine: openBrace.loc.start.line,
-      };
-      const body = Array.isArray(
-        node.body
-      )
-        ? node.body as LintNode[]
-        : [];
-
-      collectSameLineSplits(
-        body,
-        bodyIndentForBlock(
-          openBrace
-        )
-      );
-
-      for (const statement of body) {
-        const firstToken = sourceCode.getFirstToken(
-          statement
-        );
-        if (firstToken && isTokenOnSameLine(
-          sourceCode,
-          openBrace,
-          firstToken
-        )) {
-          continue;
-        }
-
-        markStatement(
-          sourceCode,
-          statement,
-          marks,
-          mark
-        );
-      }
-
-      if (
-        closeBrace.value === '}'
-        && !isTokenOnSameLine(
-          sourceCode,
-          openBrace,
-          closeBrace
-        )
-      ) {
-        const tokenBefore = sourceCode.getTokenBefore(
-          closeBrace
-        );
-        if (tokenBefore) {
-          closeGaps.push(
-            {
-              tokenBeforeEnd: tokenBefore.range[1],
-              closeStart: closeBrace.range[0],
-              braceLine: openBrace.loc.start.line,
-            }
-          );
-        }
-      }
-    }
+    const closeGaps: CloseGap[] = [];
 
     return {
       Program(node) {
@@ -260,8 +41,10 @@ const rule: RuleModule = {
           type: 'program' as const
         };
         collectSameLineSplits(
+          sourceCode,
           node.body,
-          ''
+          '',
+          edits
         );
         for (const statement of node.body) {
           markStatement(
@@ -272,8 +55,24 @@ const rule: RuleModule = {
           );
         }
       },
-      BlockStatement: visitBlock,
-      StaticBlock: visitBlock,
+      BlockStatement(node) {
+        visitBlock(
+          sourceCode,
+          node,
+          marks,
+          edits,
+          closeGaps
+        );
+      },
+      StaticBlock(node) {
+        visitBlock(
+          sourceCode,
+          node,
+          marks,
+          edits,
+          closeGaps
+        );
+      },
       SwitchCase(node) {
         const caseToken = sourceCode.getFirstToken(
           node
@@ -287,15 +86,17 @@ const rule: RuleModule = {
           caseLine: caseToken.loc.start.line,
         };
 
-        const caseIndent = `${getLineIndentFromLines(
-          sourceCode.lines,
+        const caseIndent = `${getLineIndent(
+          sourceCode,
           caseToken.loc.start.line
         )}  `;
         collectSameLineSplits(
+          sourceCode,
           node.consequent.filter(
             (statement) => statement.type !== 'BlockStatement'
           ),
           caseIndent,
+          edits
         );
 
         for (const statement of node.consequent) {
@@ -327,202 +128,14 @@ const rule: RuleModule = {
         );
       },
       'Program:exit'(node) {
-        for (const conditionNode of conditionNodes) {
-          const testNode = conditionNode.type === 'SwitchStatement'
-            ? conditionNode.discriminant
-            : conditionNode.test;
-          if (testNode) {
-            collapseConditionSpacing(
-              sourceCode,
-              testNode,
-              edits
-            );
-          }
-        }
-
-        const original = sourceCode.text;
-        const lines = sourceCode.lines;
-
-        function expectedIndentForLine(
-          lineNumber: number,
-          stack: Set<number> = new Set()
-        ): string {
-          if (stack.has(
-            lineNumber
-          )) {
-            return getLineIndentFromLines(
-              lines,
-              lineNumber
-            );
-          }
-
-          const mark = marks.get(
-            lineNumber
-          );
-          if (mark === null || mark === undefined) {
-            return getLineIndentFromLines(
-              lines,
-              lineNumber
-            );
-          }
-
-          stack.add(
-            lineNumber
-          );
-
-          if (mark.type === 'program') {
-            return '';
-          }
-
-          if (mark.type === 'block') {
-            return `${expectedIndentForLine(
-              mark.braceLine,
-              stack
-            )}  `;
-          }
-
-          if (mark.type === 'case') {
-            return `${expectedIndentForLine(
-              mark.caseLine,
-              stack
-            )}  `;
-          }
-
-          return getLineIndentFromLines(
-            lines,
-            lineNumber
-          );
-        }
-
-        for (const [
-          lineNumber
-        ] of marks) {
-          const line = lines[lineNumber - 1] ?? '';
-          const indentMatch = /^[\t ]*/.exec(
-            line
-          );
-          const actualIndent = indentMatch?.[0] ?? '';
-          const expectedIndent = expectedIndentForLine(
-            lineNumber
-          );
-
-          if (actualIndent === expectedIndent) {
-            continue;
-          }
-
-          const lineStart = sourceCode.getIndexFromLoc(
-            {
-              line: lineNumber,
-              column: 0,
-            }
-          );
-
-          edits.push(
-            {
-              start: lineStart,
-              end: lineStart + actualIndent.length,
-              text: expectedIndent,
-            }
-          );
-        }
-
-        for (const closeGap of closeGaps) {
-          const closeIndent = expectedIndentForLine(
-            closeGap.braceLine
-          );
-          const expected = `\n${closeIndent}`;
-          const actual = original.slice(
-            closeGap.tokenBeforeEnd,
-            closeGap.closeStart
-          );
-          if (actual === expected) {
-            continue;
-          }
-
-          edits.push(
-            {
-              start: closeGap.tokenBeforeEnd,
-              end: closeGap.closeStart,
-              text: expected,
-            }
-          );
-        }
-
-        for (let index = 0; index < lines.length; index += 1) {
-          const line = lines[index];
-          const match = /[\t ]+$/.exec(
-            line
-          );
-          if (match === null || match === undefined) {
-            continue;
-          }
-
-          const lineNumber = index + 1;
-          const lineStart = sourceCode.getIndexFromLoc(
-            {
-              line: lineNumber,
-              column: 0,
-            }
-          );
-
-          edits.push(
-            {
-              start: lineStart + line.length - match[0].length,
-              end: lineStart + line.length,
-              text: '',
-            }
-          );
-        }
-
-        const reported: TextEdit[] = [];
-
-        for (const edit of edits) {
-          if (edit.start === edit.end && edit.text === '') {
-            continue;
-          }
-
-          const actual = original.slice(
-            edit.start,
-            edit.end
-          );
-          if (actual === edit.text) {
-            continue;
-          }
-
-          const overlaps = reported.some(
-            (previous) => edit.start < previous.end && previous.start < edit.end
-          );
-          if (overlaps) {
-            continue;
-          }
-
-          reported.push(
-            edit
-          );
-          context.report(
-            {
-              node,
-              loc: {
-                start: sourceCode.getLocFromIndex(
-                  edit.start
-                ),
-                end: sourceCode.getLocFromIndex(
-                  edit.end
-                ),
-              },
-              messageId: 'badWhitespace',
-              fix(fixer: RuleFixer) {
-                return fixer.replaceTextRange(
-                  [
-                    edit.start,
-                    edit.end
-                  ],
-                  edit.text
-                );
-              },
-            }
-          );
-        }
+        applyBlockIndentFixes(
+          context,
+          node,
+          marks,
+          edits,
+          closeGaps,
+          conditionNodes
+        );
       },
     };
   },

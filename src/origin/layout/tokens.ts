@@ -42,14 +42,14 @@ export function getFunctionParameterParens(
     let head = sourceCode.getFirstToken(
       node
     );
+
+
+
+
     if (head?.value === 'async') {
-      head = sourceCode.getTokenAfter(
-        head
-      );
+      head = sourceCode.getTokenAfter(head);
     }
-    if (!head || !isOpeningParenToken(
-      head
-    )) {
+    if (!head || !isOpeningParenToken(head)) {
       return null;
     }
     leftParen = head;
@@ -178,4 +178,3 @@ export function getCoveredEndToken(
   }
   return end;
 }
-
