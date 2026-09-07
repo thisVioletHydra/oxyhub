@@ -24,5 +24,5 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["src/origin", "src/painRoom", "oxlint.config.ts"]
+  "include": ["src/origin", "src/painRoom", "oxlint.config.ts", "write-recommended.ts"]
 }

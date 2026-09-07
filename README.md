@@ -41,7 +41,7 @@ pnpm add -D oxlint @oxyhub/oxlint-plugin
 
 ## Configuration
 
-All plugin rules are on by default. Extend the shipped config, then override only what you want off.
+Create `oxlint.config.ts`. Do not list `oxyhub/*` rules. Do not use `.oxlintrc.json`.
 
 ```ts
 import { defineConfig } from 'oxlint';
@@ -51,6 +51,15 @@ import oxyhub from '@oxyhub/oxlint-plugin/config';
 export default defineConfig({
   extends: [oxyhub],
 });
+```
+
+```json
+{
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix"
+  }
+}
 ```
 
 Turn a rule off only when you have to:

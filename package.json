@@ -42,7 +42,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown && node src/origin/write-recommended.ts",
+    "build": "tsdown && node write-recommended.ts",
     "prepublishOnly": "pnpm build",
     "lint": "pnpm build && oxlint src/origin src/painRoom",
     "lint:fix": "pnpm build && oxlint --fix src/origin src/painRoom",
