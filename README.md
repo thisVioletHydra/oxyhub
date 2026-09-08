@@ -1,7 +1,7 @@
 <h1 align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
-    <img src="assets/banner-light.svg" alt="Oxyhub" width="380">
+    <img src="assets/banner-light.svg" alt="Oxyhub" width="240">
   </picture>
 </h1>
 
@@ -17,6 +17,17 @@
 Oxlint JS plugin. One layout, TS conventions (`node:` imports included), no sloppy `if (!x)` or floating promises.
 
 > Rule ids start with `oxyhub/`
+
+## Requirements
+
+- [Oxlint](https://oxc.rs) `^1.79.0`
+- Node.js `>=24`
+
+## Install
+
+```bash
+pnpm add -D oxlint @oxyhub/oxlint-plugin
+```
 
 ## Features
 
@@ -37,17 +48,6 @@ fetchUser().then(render)
 if (user == null) {}
 import fsPromises from 'node:fs/promises'
 await fetchUser()
-```
-
-## Requirements
-
-- [Oxlint](https://oxc.rs) `^1.79.0`
-- Node.js `>=24`
-
-## Install
-
-```bash
-pnpm add -D oxlint @oxyhub/oxlint-plugin
 ```
 
 ## Configuration
