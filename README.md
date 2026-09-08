@@ -14,7 +14,7 @@
 
 </p>
 
-Oxlint JS plugin. One layout, TS conventions (`node:` imports included), no sloppy `if (!x)` or floating promises.
+Oxyhub extends Oxlint with the ESLint rules it still lacks. You keep Oxlint's strength, power, and speed; as Oxlint grows, those borrowed rules leave this plugin.
 
 > Rule ids start with `oxyhub/`
 
@@ -27,27 +27,6 @@ Oxlint JS plugin. One layout, TS conventions (`node:` imports included), no slop
 
 ```bash
 pnpm add -D oxlint @oxyhub/oxlint-plugin
-```
-
-## Features
-
-- Highlight messy indent, calls, chains, objects, params, ternaries, and imports
-- Force `node:` defaults (`process`, `fsPromises`) instead of globals and sync `fs`
-- Ban `!` truthiness in `if` tests and unhandled promise chains
-- Ban opaque params (`e`, `err`, `el`, `i`) and bindings that steal builtins (`filter`, `object`)
-- Cap files at 300 lines (`max-lines`)
-- Autofix where the rule can rewrite the file
-
-```ts
-// before
-if (!user) {}
-fs.readFileSync(file)
-fetchUser().then(render)
-
-// after
-if (user == null) {}
-import fsPromises from 'node:fs/promises'
-await fetchUser()
 ```
 
 ## Configuration
