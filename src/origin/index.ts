@@ -3,6 +3,7 @@ import type { RuleModule } from '#plugin-types';
 import consistentBlockIndent from '#rules/consistent-block-indent';
 import consistentCallArguments from '#rules/consistent-call-arguments';
 import consistentChainLayout from '#rules/consistent-chain-layout';
+import consistentClauseLayout from '#rules/consistent-clause-layout';
 import consistentConditionSpacing from '#rules/consistent-condition-spacing';
 import consistentObjectLayout from '#rules/consistent-object-layout';
 import consistentParameterLayout from '#rules/consistent-parameter-layout';
@@ -33,6 +34,7 @@ const plugin = {
     'consistent-block-indent': consistentBlockIndent,
     'consistent-call-arguments': consistentCallArguments,
     'consistent-chain-layout': consistentChainLayout,
+    'consistent-clause-layout': consistentClauseLayout,
     'consistent-condition-spacing': consistentConditionSpacing,
     'consistent-object-layout': consistentObjectLayout,
     'consistent-parameter-layout': consistentParameterLayout,

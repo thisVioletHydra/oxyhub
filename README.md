@@ -65,7 +65,7 @@ export default defineConfig({
 
 JSON still works: `"extends": ["./node_modules/@oxyhub/oxlint-plugin/recommended.json"]`. One config file per directory — JSON or TS, not both.
 
-## Rules (23)
+## Rules (24)
 
 ### Problem (2)
 
@@ -90,7 +90,7 @@ How to write TypeScript. Default: `error`.
 | `no-node-named-import` | No named value imports from `node:` builtins. |
 | `no-overloaded-if` | At most 3 checks in an `if`. Four or more: extract a named predicate. |
 
-### Layout (14)
+### Layout (15)
 
 Indent, wrapping, blank lines. `consistent-*` and blank-in-* default to `error`. `padding-line-*` default to `warn`.
 
@@ -99,6 +99,7 @@ Indent, wrapping, blank lines. `consistent-*` and blank-in-* default to `error`.
 | `consistent-block-indent` | Indent blocks, split same-line statements, clean leftover whitespace. |
 | `consistent-call-arguments` | Call args stay inline, or wrap when the first arg starts on its own line after `(`. |
 | `consistent-chain-layout` | Break only method calls (`.foo()`). Property paths (`a.b.c`) stay inline. |
+| `consistent-clause-layout` | `catch`, `else`, `else if`, and `finally` stay on the same line as `}`. |
 | `consistent-condition-spacing` | Collapse extra whitespace in single-line `if` / `while` / `switch` tests. |
 | `consistent-object-layout` | Object/array/destructure stay inline, or wrap when the first member starts on its own line after `{` / `[`. |
 | `consistent-parameter-layout` | Multiline params only when a parameter starts on its own line after `(`. |
