@@ -18,6 +18,8 @@ Oxyhub extends Oxlint with the ESLint rules it still lacks. You keep Oxlint's st
 
 > Rule ids start with `oxyhub/`
 
+[Changelog](./CHANGELOG.md)
+
 ## Requirements
 
 - [Oxlint](https://oxc.rs) `^1.79.0`
@@ -65,7 +67,7 @@ export default defineConfig({
 
 JSON still works: `"extends": ["./node_modules/@oxyhub/oxlint-plugin/recommended.json"]`. One config file per directory — JSON or TS, not both.
 
-## Rules (24)
+## Rules (25)
 
 ### Problem (2)
 
@@ -76,7 +78,7 @@ Bugs. Default: `error`.
 | `no-bang-condition` | `!` only on real booleans. Token getters fix to `=== null`; anything else to a full nullish check. |
 | `no-floating-promise` | Floating promise chains need `.catch`, `void`, `await`, or `return`. |
 
-### Convention (7)
+### Convention (8)
 
 How to write TypeScript. Default: `error`.
 
@@ -89,6 +91,7 @@ How to write TypeScript. Default: `error`.
 | `prefer-node-default-name` | Conventional default import names (`process`, `path`, `fs`, `fsPromises`). |
 | `no-node-named-import` | No named value imports from `node:` builtins. |
 | `no-overloaded-if` | At most 3 checks in an `if`. Four or more: extract a named predicate. |
+| `semi` | Require semicolons. |
 
 ### Layout (15)
 

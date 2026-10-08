@@ -25,6 +25,7 @@ import preferFsPromises from '#rules/prefer-fs-promises';
 import preferNodeDefaultName from '#rules/prefer-node-default-name';
 import preferObjectArrowMethod from '#rules/prefer-object-arrow-method';
 import preferProcessImport from '#rules/prefer-process-import';
+import semi from '#rules/semi';
 
 const plugin = {
   meta: {
@@ -56,6 +57,7 @@ const plugin = {
     'prefer-node-default-name': preferNodeDefaultName,
     'prefer-object-arrow-method': preferObjectArrowMethod,
     'prefer-process-import': preferProcessImport,
+    'semi': semi,
   },
 } satisfies { meta: { name: string }; rules: Record<string, RuleModule> };
 

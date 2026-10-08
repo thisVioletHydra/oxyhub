@@ -29,6 +29,7 @@
 | `prefer-node-default-name` | Conventional default import names (`process`, `path`, `fs`, `fsPromises`). | — |
 | `no-node-named-import` | No named value imports from `node:` builtins. | — |
 | `no-overloaded-if` | At most 3 checks in an `if`. Four or more: extract a named predicate. | — |
+| `semi` | Require semicolons. | — |
 
 ### `prefer-descriptive-binding`
 
