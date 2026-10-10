@@ -1,7 +1,8 @@
 # consistent-jsx-layout
 
 Aligns JSX elements and fragments with two spaces per nesting level. Tags
-with three or more props (including spreads) use one prop per line. Existing
+with four or more props (including spreads) use one prop per line. Up to three
+props can stay inline or in a column, preserving the author's choice. Existing
 multiline tags retain their column layout; shorter single-line tags stay compact.
 
 Enabled automatically by `@oxyhub/oxlint-plugin/config` for JSX and TSX.

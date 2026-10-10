@@ -39,7 +39,7 @@ function baseIndent(node: JsxNode): string {
 const rule: RuleModule = {
   meta: {
     type: 'layout',
-    docs: { description: 'Indent JSX and put three or more props on separate lines.' },
+    docs: { description: 'Preserve short JSX layouts and put four or more props on separate lines.' },
     fixable: 'whitespace',
     schema: [],
     messages: { layout: 'Align JSX nesting and place multiline props in a column.' },
@@ -68,7 +68,7 @@ const rule: RuleModule = {
       whitespace(lineStart, node.range[0], indent);
 
       const attributes = node.attributes ?? [];
-      const multiline = attributes.length >= 3 || node.loc.start.line !== node.loc.end.line;
+      const multiline = attributes.length >= 4 || node.loc.start.line !== node.loc.end.line;
       if (node.type === 'JSXOpeningElement' && node.name !== undefined && multiline) {
         let previousEnd = node.name.range[1];
         for (const attribute of attributes) {

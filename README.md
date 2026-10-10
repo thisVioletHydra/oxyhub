@@ -104,7 +104,7 @@ Indent, wrapping, blank lines. All layout rules default to `warn` and remain aut
 | `consistent-chain-layout` | Break only method calls (`.foo()`). Property paths (`a.b.c`) stay inline. |
 | `consistent-clause-layout` | `catch`, `else`, `else if`, and `finally` stay on the same line as `}`. |
 | `consistent-condition-spacing` | Collapse extra whitespace in single-line `if` / `while` / `switch` tests. |
-| `consistent-jsx-layout` | Align JSX nesting; place three or more props, or existing multiline props, in a column. |
+| `consistent-jsx-layout` | Align JSX nesting; preserve inline or column layout for up to three props, require a column from four props. |
 | `consistent-object-layout` | Object/array/destructure stay inline, or wrap when the first member starts on its own line after `{` / `[`. |
 | `consistent-parameter-layout` | Multiline params only when a parameter starts on its own line after `(`. |
 | `consistent-property-indent` | Align object/array members to the opening `{` / `[` indent plus two spaces. |
