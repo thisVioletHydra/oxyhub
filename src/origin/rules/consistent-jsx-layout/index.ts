@@ -68,7 +68,7 @@ const rule: RuleModule = {
       whitespace(lineStart, node.range[0], indent);
 
       const attributes = node.attributes ?? [];
-      const multiline = attributes.length >= 4 || node.loc.start.line !== node.loc.end.line;
+      const multiline = attributes.length >= 4;
       if (node.type === 'JSXOpeningElement' && node.name !== undefined && multiline) {
         let previousEnd = node.name.range[1];
         for (const attribute of attributes) {
@@ -78,6 +78,23 @@ const rule: RuleModule = {
 
         const closeStart = node.range[1] - (node.selfClosing === true ? 2 : 1);
         whitespace(previousEnd, closeStart, `\n${indent}`);
+      } else if (node.type === 'JSXOpeningElement') {
+        // Preserve every existing line break for short tags, including mixed
+        // layouts with the first prop beside the component name.
+        for (const attribute of attributes) {
+          if (attribute.loc.start.line === node.loc.start.line) {
+            continue;
+          }
+
+          const start = source.getIndexFromLoc({ line: attribute.loc.start.line, column: 0 });
+          whitespace(start, attribute.range[0], `${indent}  `);
+        }
+
+        if (node.loc.end.line !== node.loc.start.line) {
+          const start = source.getIndexFromLoc({ line: node.loc.end.line, column: 0 });
+          const closeStart = node.range[1] - (node.selfClosing === true ? 2 : 1);
+          whitespace(start, closeStart, indent);
+        }
       }
 
       if (edits.length === 0) {
