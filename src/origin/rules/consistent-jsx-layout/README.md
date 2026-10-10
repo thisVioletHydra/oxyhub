@@ -2,8 +2,9 @@
 
 Aligns JSX elements and fragments with two spaces per nesting level. Tags
 with four or more props (including spreads) use one prop per line. Up to three
-props can stay inline or in a column, preserving the author's choice. Existing
-multiline tags retain their column layout; shorter single-line tags stay compact.
+props follow the first prop: beside the component name means all props inline;
+on a new line means one prop per line. Extra spacing is normalized. Values
+and expressions keep their contents, even when those contents span lines.
 
 Enabled automatically by `@oxyhub/oxlint-plugin/config` for JSX and TSX.
 No React runtime dependency is needed.

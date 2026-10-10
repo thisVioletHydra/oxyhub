@@ -39,7 +39,7 @@ function baseIndent(node: JsxNode): string {
 const rule: RuleModule = {
   meta: {
     type: 'layout',
-    docs: { description: 'Preserve short JSX layouts and put four or more props on separate lines.' },
+    docs: { description: 'Use the first prop to choose JSX layout; wrap four or more props.' },
     fixable: 'whitespace',
     schema: [],
     messages: { layout: 'Align JSX nesting and place multiline props in a column.' },
@@ -68,33 +68,19 @@ const rule: RuleModule = {
       whitespace(lineStart, node.range[0], indent);
 
       const attributes = node.attributes ?? [];
-      const multiline = attributes.length >= 4;
-      if (node.type === 'JSXOpeningElement' && node.name !== undefined && multiline) {
+      const first = attributes[0];
+      const multiline = attributes.length >= 4
+        || (first !== undefined && node.name !== undefined && first.loc.start.line > node.name.loc.end.line);
+      if (node.type === 'JSXOpeningElement' && node.name !== undefined) {
         let previousEnd = node.name.range[1];
         for (const attribute of attributes) {
-          whitespace(previousEnd, attribute.range[0], `\n${indent}  `);
+          whitespace(previousEnd, attribute.range[0], multiline ? `\n${indent}  ` : ' ');
           previousEnd = attribute.range[1];
         }
 
         const closeStart = node.range[1] - (node.selfClosing === true ? 2 : 1);
-        whitespace(previousEnd, closeStart, `\n${indent}`);
-      } else if (node.type === 'JSXOpeningElement') {
-        // Preserve every existing line break for short tags, including mixed
-        // layouts with the first prop beside the component name.
-        for (const attribute of attributes) {
-          if (attribute.loc.start.line === node.loc.start.line) {
-            continue;
-          }
-
-          const start = source.getIndexFromLoc({ line: attribute.loc.start.line, column: 0 });
-          whitespace(start, attribute.range[0], `${indent}  `);
-        }
-
-        if (node.loc.end.line !== node.loc.start.line) {
-          const start = source.getIndexFromLoc({ line: node.loc.end.line, column: 0 });
-          const closeStart = node.range[1] - (node.selfClosing === true ? 2 : 1);
-          whitespace(start, closeStart, indent);
-        }
+        const closeGap = multiline ? `\n${indent}` : node.selfClosing === true ? ' ' : '';
+        whitespace(previousEnd, closeStart, closeGap);
       }
 
       if (edits.length === 0) {
