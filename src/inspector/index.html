@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oxyhub · Rule inspector</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <main>
+    <header><a class="brand" href="/">oxyhub<span> / inspector</span></a><span class="status">LOCAL CATALOG</span></header>
+    <section class="intro"><p class="eyebrow">RULE INTELLIGENCE</p><h1>Вся картина.<br><span>Без догадок.</span></h1><p>Правила, области применения и пересечения в одном месте.</p></section>
+    <div class="stat-heading"><span>ОБЛАСТЬ ПРИМЕНЕНИЯ</span><button id="count-sort" aria-pressed="false">По количеству правил ↓</button></div>
+    <section id="stats" class="stats" aria-label="Количество правил по языкам"></section>
+    <section class="catalog" aria-label="Каталог правил">
+      <div class="toolbar">
+        <label class="search">Поиск <input id="search" type="search" placeholder="Название или описание…"></label>
+        <label>Язык <select id="language"><option value="all">Все языки</option></select></label>
+        <label>Источник <select id="origin"><option value="all">Все правила</option><option value="oxyhub">Oxyhub</option><option value="oxlint">Oxlint</option></select></label>
+        <label>Сортировка <select id="sort"><option value="name">По названию</option><option value="languages">По числу языков</option><option value="severity">По важности</option><option value="autofix">С автофиксом сначала</option></select></label>
+      </div>
+      <div class="catalog-heading"><h2>Каталог правил</h2><span id="result" role="status" aria-live="polite">Загрузка…</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Правило</th><th>Языки · пересечения</th><th>Важность</th><th>Автофикс</th></tr></thead><tbody id="rows"></tbody></table></div>
+      <p class="footnote">Счётчики включают активные правила текущего фильтра. Языки — область применения, а не число срабатываний. Выключенные правила доступны в каталоге.</p>
+    </section>
+    <footer>Из исходников oxyhub и базового конфига. Никаких данных проекта не отправляется.</footer>
+  </main>
+  <dialog id="details"><div class="dialog-top"><span class="eyebrow">RULE DETAILS</span><button id="close" aria-label="Закрыть подробности">✕</button></div><div id="detail-content"></div></dialog>
+</body>
+</html>

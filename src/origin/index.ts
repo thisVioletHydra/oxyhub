@@ -10,6 +10,7 @@ import consistentObjectLayout from '#rules/consistent-object-layout';
 import consistentParameterLayout from '#rules/consistent-parameter-layout';
 import consistentPropertyIndent from '#rules/consistent-property-indent';
 import consistentTernaryLayout from '#rules/consistent-ternary-layout';
+import consistentTypeLayout from '#rules/consistent-type-layout';
 import idLength from '#rules/id-length';
 import importLayout from '#rules/import-layout';
 import noBangCondition from '#rules/no-bang-condition';
@@ -43,6 +44,7 @@ const plugin = {
     'consistent-parameter-layout': consistentParameterLayout,
     'consistent-property-indent': consistentPropertyIndent,
     'consistent-ternary-layout': consistentTernaryLayout,
+    'consistent-type-layout': consistentTypeLayout,
     'id-length': idLength,
     'import-layout': importLayout,
     'no-bang-condition': noBangCondition,

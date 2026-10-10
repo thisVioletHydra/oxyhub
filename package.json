@@ -20,6 +20,8 @@
     "plugin"
   ],
   "imports": {
+    "#inspector-plugin": "./src/origin/index.ts",
+    "#inspector-config": "./src/origin/config.ts",
     "#plugin-types": "./src/origin/plugin-types.ts",
     "#rules/*": "./src/origin/rules/*/index.ts",
     "#layout/*": "./src/origin/layout/*.ts",
@@ -51,6 +53,7 @@
     "punish": "node src/painRoom/punish.ts",
     "punish:once": "node src/painRoom/punish.ts --once",
     "release": "bumpp",
+    "inspect": "node src/inspector/server.ts",
     "typecheck": "tsc --noEmit"
   },
   "publishConfig": {

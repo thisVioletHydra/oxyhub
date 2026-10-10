@@ -109,6 +109,7 @@ Indent, wrapping, blank lines. All layout rules default to `warn` and remain aut
 | `consistent-parameter-layout` | Multiline params only when a parameter starts on its own line after `(`. |
 | `consistent-property-indent` | Align object/array members to the opening `{` / `[` indent plus two spaces. |
 | `consistent-ternary-layout` | Ternaries stay inline, or wrap when `?` starts on its own line. |
+| `consistent-type-layout` | Format TypeScript object types and interfaces; the first member chooses inline or column layout. |
 | `import-layout` | Imports at the top: type → named → default → side-effect. |
 | `no-blank-lines-in-arrow-expression` | No blank line between `=>` and an expression body. |
 | `no-blank-lines-in-chain` | No blank lines inside a member call chain. |
@@ -119,6 +120,13 @@ Indent, wrapping, blank lines. All layout rules default to `warn` and remain aut
 ## Settings
 
 Recommended also turns on oxlint `max-lines` at **300**. That is core oxlint, not `oxyhub/*`.
+
+## Rule inspector
+
+In the repository, run `pnpm inspect` and open `http://127.0.0.1:4174`.
+The local page shows every custom and preset rule, language overlaps,
+sortable counts, search, filters, autofix support and rule details.
+Stop with Ctrl+C. See [inspector documentation](src/inspector/README.md).
 
 ## License
 
