@@ -123,10 +123,35 @@ Recommended also turns on oxlint `max-lines` at **300**. That is core oxlint, no
 
 ## Rule inspector
 
-In the repository, run `pnpm inspect` and open `http://127.0.0.1:4174`.
-The local page shows every custom and preset rule, language overlaps,
-sortable counts, search, filters, autofix support and rule details.
-Stop with Ctrl+C. See [inspector documentation](src/inspector/README.md).
+A local dashboard for exploring the rules shipped with Oxyhub. Run it from
+this repository with Node.js 24 or newer:
+
+```sh
+pnpm install
+pnpm inspect
+```
+
+Open [localhost:4174](http://127.0.0.1:4174). The terminal prints the address;
+press **Ctrl+C** to stop the server.
+
+- Search rules by name or description; filter by JS, TS, JSX, TSX or rule source.
+- Sort by name, language overlap, severity or autofix support.
+- See active-rule counts per language; click a language card to filter the table.
+- Click a rule to read its summary, messages, options and source documentation.
+
+The catalog reads the source plugin and base config. Language counts overlap:
+a rule shared by JS and TS appears in both totals. Disabled rules remain
+visible in the table but do not count toward active totals.
+
+To use another port:
+
+```sh
+OXYHUB_INSPECTOR_PORT=4175 pnpm inspect
+```
+
+Restart the inspector after changing rule implementations or metadata. This
+is a repository development tool; installing the npm plugin alone does not
+install the inspector. See [inspector documentation](src/inspector/README.md).
 
 ## License
 
