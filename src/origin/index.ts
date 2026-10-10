@@ -5,6 +5,7 @@ import consistentCallArguments from '#rules/consistent-call-arguments';
 import consistentChainLayout from '#rules/consistent-chain-layout';
 import consistentClauseLayout from '#rules/consistent-clause-layout';
 import consistentConditionSpacing from '#rules/consistent-condition-spacing';
+import consistentJsxLayout from '#rules/consistent-jsx-layout';
 import consistentObjectLayout from '#rules/consistent-object-layout';
 import consistentParameterLayout from '#rules/consistent-parameter-layout';
 import consistentPropertyIndent from '#rules/consistent-property-indent';
@@ -37,6 +38,7 @@ const plugin = {
     'consistent-chain-layout': consistentChainLayout,
     'consistent-clause-layout': consistentClauseLayout,
     'consistent-condition-spacing': consistentConditionSpacing,
+    'consistent-jsx-layout': consistentJsxLayout,
     'consistent-object-layout': consistentObjectLayout,
     'consistent-parameter-layout': consistentParameterLayout,
     'consistent-property-indent': consistentPropertyIndent,

@@ -2,20 +2,25 @@ import plugin from './index.ts';
 
 const prefix = plugin.meta.name;
 
-function isPaddingRule(id: string) {
-  return id.startsWith('padding-line-');
+function isLayoutRule(rule: unknown): boolean {
+  if (typeof rule !== 'object' || rule === null || !('meta' in rule)) {
+    return false;
+  }
+
+  const meta = rule.meta;
+  return typeof meta === 'object' && meta !== null && 'type' in meta && meta.type === 'layout';
 }
 
 function oxyhubRules() {
   const rules: Record<string, unknown> = {};
 
-  for (const id of Object.keys(plugin.rules)) {
+  for (const [id, rule] of Object.entries(plugin.rules)) {
     if (id === 'id-length') {
       rules[`${prefix}/${id}`] = 'off';
       continue;
     }
 
-    const severity = isPaddingRule(id) ? 'warn' : 'error';
+    const severity = isLayoutRule(rule) ? 'warn' : 'error';
     rules[`${prefix}/${id}`] = severity;
   }
 

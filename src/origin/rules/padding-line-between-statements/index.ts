@@ -8,7 +8,13 @@ import {
   statementList,
 } from '#layout/statements';
 
-function checkList(context: RuleContext, list: LintNode[]) {
+function isForLoop(node: LintNode): boolean {
+  return node.type === 'ForStatement'
+    || node.type === 'ForInStatement'
+    || node.type === 'ForOfStatement';
+}
+
+function checkList(context: RuleContext, list: LintNode[], loopsOnly = false) {
   for (const [index, current] of list.entries()) {
     if (index === 0) {
       continue;
@@ -19,11 +25,15 @@ function checkList(context: RuleContext, list: LintNode[]) {
       continue;
     }
 
+    if (loopsOnly && !isForLoop(current)) {
+      continue;
+    }
+
     if (isExitStatement(current)) {
       continue;
     }
 
-    if (isSimpleStatement(previous)) {
+    if (isSimpleStatement(previous) && !isForLoop(current)) {
       continue;
     }
 
@@ -43,7 +53,7 @@ function checkList(context: RuleContext, list: LintNode[]) {
 }
 
 function checkContainer(context: RuleContext, node: LintNode) {
-  if (node.type !== 'StaticBlock' && enclosingFunction(node) === null) {
+  if (node.type !== 'Program' && node.type !== 'StaticBlock' && enclosingFunction(node) === null) {
     return;
   }
 
@@ -52,7 +62,7 @@ function checkContainer(context: RuleContext, node: LintNode) {
     return;
   }
 
-  checkList(context, list);
+  checkList(context, list, node.type === 'Program');
 }
 
 const rule: RuleModule = {
@@ -60,7 +70,7 @@ const rule: RuleModule = {
     type: 'layout',
     docs: {
       description:
-        'Require a blank line after if / for / try / switch / etc. when another statement follows.',
+        'Separate control-flow statements from following code and add a blank line before for loops.',
     },
     fixable: 'whitespace',
     messages: {
@@ -70,6 +80,9 @@ const rule: RuleModule = {
   },
   create(context) {
     return {
+      Program(node: LintNode) {
+        checkContainer(context, node);
+      },
       BlockStatement(node: LintNode) {
         checkContainer(context, node);
       },
